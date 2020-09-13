@@ -1,11 +1,13 @@
-package model;
+package model.keras;
 
 import data.ProductionParameters;
+import model.ModelInputConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-public class RmModel extends Model {
-    protected RmModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
+public class Rp02KerasModel extends KerasModel {
+
+    protected Rp02KerasModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
         super(model, inputConfiguration);
     }
 

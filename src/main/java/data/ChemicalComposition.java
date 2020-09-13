@@ -2,21 +2,44 @@ package data;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ChemicalComposition {
-    private final int id;
-    private final float c;
-    private final float si;
-    private final float mn;
-    private final float mg;
-    private final float cu;
-    private final float ni;
-    private final float mo;
-    private final float s;
-    private final float p;
-    private final float cr;
+    public static final ChemicalComposition NOT_ALLOYED = new ChemicalComposition(-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    private int id;
+    private double c;
+    private double si;
+    private double mn;
+    private double mg;
+    private double cu;
+    private double ni;
+    private double mo;
+    private double s;
+    private double p;
+    private double cr;
+    private double v;
+
+
+    @Override
+    public String toString() {
+        return "ChemicalComposition{" +
+                "id=" + id +
+                ", c=" + c +
+                ", si=" + si +
+                ", mn=" + mn +
+                ", mg=" + mg +
+                ", cu=" + cu +
+                ", ni=" + ni +
+                ", mo=" + mo +
+                ", s=" + s +
+                ", p=" + p +
+                ", cr=" + cr +
+                ", v=" + v +
+                '}';
+    }
 }

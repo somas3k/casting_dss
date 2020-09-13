@@ -32,4 +32,11 @@ public class OptimizedADISolution extends Solution {
     public int hashCode() {
         return Objects.hash(productionParameters);
     }
+
+    @Override
+    public String toString() {
+        return "OptimizedADISolution{" +
+                "productionParameters=" + productionParameters +
+                '}';
+    }
 }

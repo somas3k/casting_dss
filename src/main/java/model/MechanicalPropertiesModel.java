@@ -19,7 +19,7 @@ public class MechanicalPropertiesModel {
 //    private final Model kModel;
 
 
-    public MechanicalProperties evaluateProductionParameters(ProductionParameters parameters) {
+    public MechanicalProperties evaluateProductionParameters(ProductionParameters parameters) throws Exception {
         return new MechanicalProperties(
                 0,
                 0,

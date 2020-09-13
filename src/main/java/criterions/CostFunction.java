@@ -3,12 +3,12 @@ package criterions;
 import data.ChemicalComposition;
 import data.ProductionParameters;
 
-public class CostFunction implements Function{
-    private final float avgIronCost;
-    private final float avgBatchWeight;
-    private final float niCost;
-    private final float cuCost;
-    private final float moCost;
+public class CostFunction implements Function {
+    private final double avgIronCost;
+    private final double avgBatchWeight;
+    private final double niCost;
+    private final double cuCost;
+    private final double moCost;
 
     public CostFunction(float avgIronCost, float avgBatchWeight, float niCost, float cuCost, float moCost) {
         this.avgIronCost = avgIronCost;
@@ -18,43 +18,56 @@ public class CostFunction implements Function{
         this.moCost = moCost;
     }
 
+    @Override
     public double evaluate(ProductionParameters parameters) {
-        float chemCompIncrease = getChemCompIncrease(parameters.getComposition());
-        float austTempIncrease = getAustTempIncrease(parameters.getAustTemp());
-        float austTimeIncrease = getAustTimeIncrease(parameters.getAustTime());
-        float ausfTempIncrease = getAusfTempIncrease(parameters.getAusfTemp());
-        float ausfTimeIncrease = getAusfTimeIncrease(parameters.getAusfTime());
+        double chemCompIncrease = getChemCompIncrease(parameters.getComposition());
+        double austTempIncrease = getAustTempIncrease(parameters.getAustTemp());
+        double austTimeIncrease = getAustTimeIncrease(parameters.getAustTime());
+        double ausfTempIncrease = getAusfTempIncrease(parameters.getAusfTemp());
+        double ausfTimeIncrease = getAusfTimeIncrease(parameters.getAusfTime());
         return avgIronCost *
                 (1 + (chemCompIncrease + austTempIncrease + austTimeIncrease + ausfTempIncrease + ausfTimeIncrease) / 100) *
                 avgBatchWeight;
     }
 
-    private float getAusfTimeIncrease(int ausfTime) {
-        return 0.1f;
+    private double getAusfTimeIncrease(int ausfTime) {
+        if (ausfTime <= 30) {
+            return 1.5;
+        }
+        if (ausfTime <= 120) {
+            return (((2.5 - 1.5) * (ausfTime - 30)) / (120 - 30)) + 1.5;
+        }
+        return (((10.5 - 2.5) * (ausfTime - 120)) / (180 - 120)) + 2.5;
     }
 
-    private float getAusfTempIncrease(int ausfTemp) {
+    private double getAusfTempIncrease(int ausfTemp) {
         if (ausfTemp <= 270) {
             return 0;
         }
-        return (9.0f / 650) * ausfTemp - 243.0f / 65;
+        return (((1.8 - 0.0) * (ausfTemp - 270)) / (400 - 270)) + 0.0;
     }
 
-    private float getAustTimeIncrease(int austTime) {
-        return 0;
+    private double getAustTimeIncrease(int austTime) {
+        if (austTime <= 30) {
+            return 1.7;
+        }
+        if (austTime <= 120) {
+            return (((2.1 - 1.7) * (austTime - 30)) / (120 - 30)) + 1.7;
+        }
+        return (((8.7 - 2.1) * (austTime - 120)) / (240 - 120)) + 2.1;
     }
 
-    private float getAustTempIncrease(int austTemp) {
+    private double getAustTempIncrease(int austTemp) {
         if (austTemp <= 860) {
             return 0;
         }
         if (austTemp <= 890) {
-            return (1.0f / 43) * austTemp - 20;
+            return (((0.7 - 0.0) * (austTemp - 860)) / (890 - 860)) + 0.0;
         }
-        return 0.005f * austTemp - 3.75f;
+        return (((1.0 - 0.7) * (austTemp - 890)) / (950 - 890)) + 0.7;
     }
 
-    private float getChemCompIncrease(ChemicalComposition composition) {
-        return 1 + (composition.getNi() / 100) * niCost + (composition.getCu() / 100) * cuCost + (composition.getMo() / 100) * moCost;
+    public double getChemCompIncrease(ChemicalComposition composition) {
+        return (((composition.getNi() / 100) * niCost + (composition.getCu() / 100) * cuCost + (composition.getMo() / 100) * moCost) / avgIronCost) * 100;
     }
 }

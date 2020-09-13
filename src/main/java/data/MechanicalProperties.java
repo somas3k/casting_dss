@@ -8,10 +8,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class MechanicalProperties {
-    private float rm;
-    private float rp02;
-    private float a5;
-    private float hb;
-    private float k;
+    private double rm;
+    private double rp02;
+    private double a5;
+    private double hb;
+    private double k;
 
 }

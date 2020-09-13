@@ -1,13 +1,14 @@
-package model;
+package model.keras;
 
 import data.ProductionParameters;
+import model.ModelInputConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-public class KModel extends Model {
+public class KKerasModel extends KerasModel {
 
 
-    protected KModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
+    protected KKerasModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
         super(model, inputConfiguration);
     }
 
