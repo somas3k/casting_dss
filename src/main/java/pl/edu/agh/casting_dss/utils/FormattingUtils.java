@@ -55,6 +55,17 @@ public class FormattingUtils {
             }
         }
     };
+    public static final StringConverter<Double> PROPORTION_CONVERTER = new StringConverter<>() {
+        @Override
+        public String toString(Double value) {
+            return String.format("%.2f", value);
+        }
+
+        @Override
+        public Double fromString(String s) {
+            return Double.parseDouble(s);
+        }
+    };
     public static TextFormatter<Double> getDoubleTextFormatter() {
         return new TextFormatter<>(DOUBLE_CONVERTER, 0.0, FILTER_DOUBLE);
     }

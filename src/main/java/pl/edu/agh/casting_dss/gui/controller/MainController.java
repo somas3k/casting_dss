@@ -1,19 +1,13 @@
 package pl.edu.agh.casting_dss.gui.controller;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import org.jamesframework.core.search.listeners.SearchListener;
+import javafx.util.StringConverter;
 import pl.edu.agh.casting_dss.factories.ModelLoadingException;
 import pl.edu.agh.casting_dss.gui.model.DSSModel;
-import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
 import pl.edu.agh.casting_dss.solution.SolutionFinder;
 import pl.edu.agh.casting_dss.solution.SolutionSearchListener;
 import pl.edu.agh.casting_dss.utils.SystemConfiguration;
-import pl.edu.agh.casting_dss.utils.SystemConfigurationUtils;
 
 import java.io.IOException;
 
@@ -27,8 +21,10 @@ public class MainController {
     public TextField niPrice;
     public TextField cuPrice;
     public TextField moPrice;
-    public Button print;
+    public Button run;
     public TextArea searchingLog;
+    public Button clear;
+    public Label costQualityPropValue;
 
     private DSSModel model;
     private SystemConfiguration configuration;
@@ -40,7 +36,9 @@ public class MainController {
         niPrice.setTextFormatter(getDoubleTextFormatter());
         cuPrice.setTextFormatter(getDoubleTextFormatter());
         moPrice.setTextFormatter(getDoubleTextFormatter());
-        print.setOnMouseClicked(this::handleClick);
+        run.setOnMouseClicked(this::handleClick);
+        clear.setOnMouseClicked(mouseEvent -> searchingLog.clear());
+        costQualityPropValue.textProperty().bindBidirectional(costQualityProportion.valueProperty(), (StringConverter)PROPORTION_CONVERTER);
     }
 
     public void setConfiguration(SystemConfiguration configuration) {
@@ -64,12 +62,11 @@ public class MainController {
 
     public void handleClick(MouseEvent e) {
         try {
-            SolutionSearchListener searchListener = new SolutionSearchListener(searchingLog.textProperty());
+            SolutionSearchListener searchListener = new SolutionSearchListener(searchingLog);
             SolutionFinder.findSolution(model, configuration, searchListener);
-        } catch (IOException | InterruptedException | ModelLoadingException ioException) {
+        } catch (IOException | ModelLoadingException ioException) {
             ioException.printStackTrace();
         }
     }
-
 
 }

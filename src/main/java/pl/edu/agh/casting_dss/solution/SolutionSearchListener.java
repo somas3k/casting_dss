@@ -1,6 +1,9 @@
 package pl.edu.agh.casting_dss.solution;
 
+import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
 import org.jamesframework.core.search.LocalSearch;
@@ -11,9 +14,9 @@ import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
 
 public class SolutionSearchListener implements SearchListener<OptimizedADISolution> {
 
-    private final StringProperty searchingLog;
+    private final TextArea searchingLog;
 
-    public SolutionSearchListener(StringProperty searchingLog) {
+    public SolutionSearchListener(TextArea searchingLog) {
         this.searchingLog = searchingLog;
     }
 
@@ -39,7 +42,9 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
 
     @Override
     public void stepCompleted(Search<? extends OptimizedADISolution> search, long numSteps) {
-        addNewLine("Step " + numSteps + " completed");
+        if (numSteps % 100 == 0) {
+            addNewLine("Step " + numSteps + " completed");
+        }
     }
 
     @Override
@@ -48,11 +53,13 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
     }
 
     private void addNewLine(String text) {
-        String actualText = searchingLog.getValue();
-        if (actualText != null && !actualText.equals("")) {
-            searchingLog.setValue(actualText + "\n" + text);
-        } else {
-            searchingLog.setValue(text);
-        }
+        Platform.runLater(() -> {
+            String actualText = searchingLog.getText();
+            if (actualText != null && !actualText.equals("")) {
+                searchingLog.appendText("\n" + text);
+            } else {
+                searchingLog.setText(text);
+            }
+        });
     }
 }
