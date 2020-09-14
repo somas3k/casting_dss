@@ -1,0 +1,10 @@
+{
+  "modelWithInputConfigurationPaths": {
+    "HB": {
+      "type" : "XGB",
+      "modelPath": "/home/sg0303587/Desktop/hb_xgb.bin",
+      "modelInputConfigPath": "/home/sg0303587/Desktop/hb_model_conf.json"
+    }
+  },
+  "possibleValuesPath": "/home/sg0303587/Desktop/possible_values.json"
+}
