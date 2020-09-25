@@ -37,7 +37,7 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
 
     @Override
     public void newCurrentSolution(LocalSearch<? extends OptimizedADISolution> search, OptimizedADISolution newCurrentSolution, Evaluation newCurrentSolutionEvaluation, Validation newCurrentSolutionValidation) {
-        addNewLine("New current solution found");
+//        addNewLine("New current solution found");
     }
 
     @Override

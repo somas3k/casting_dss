@@ -55,7 +55,7 @@ public class FormattingUtils {
             }
         }
     };
-    public static final StringConverter<Double> PROPORTION_CONVERTER = new StringConverter<>() {
+    public static final StringConverter<Double> TWO_DECIMAL_CONVERTER = new StringConverter<>() {
         @Override
         public String toString(Double value) {
             return String.format("%.2f", value);

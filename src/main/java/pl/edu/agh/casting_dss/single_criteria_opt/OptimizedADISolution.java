@@ -6,12 +6,13 @@ import org.jamesframework.core.problems.sol.Solution;
 import java.util.Objects;
 
 public class OptimizedADISolution extends Solution {
-    private ProductionParameters productionParameters;
+    private final ProductionParameters productionParameters;
 
     public OptimizedADISolution(ProductionParameters productionParameters) {
         this.productionParameters = productionParameters;
     }
 
+    @Override
     public Solution copy() {
         return new OptimizedADISolution(new ProductionParameters(productionParameters));
     }

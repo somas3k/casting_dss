@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="413.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.edu.agh.casting_dss.gui.controller.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.edu.agh.casting_dss.gui.controller.MainController">
     <TabPane layoutX="51.0" layoutY="14.0" prefHeight="229.0" prefWidth="236.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <Tab text="Konfiguracja">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -52,9 +52,28 @@
                 </Pane>
             </AnchorPane>
         </Tab>
+        <Tab text="Zakresy produkcyjne">
+
+        </Tab>
         <Tab text="Uruchamianie algorytmu">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                 <VBox spacing="20" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
+                    <HBox spacing="20">
+                        <VBox spacing="20">
+                            <HBox spacing="20">
+                                <Label text="Rozwiązanie"/>
+                                <Button fx:id="generateRandomSolution" text="Wygeneruj losowe rozwiązanie"/>
+                            </HBox>
+
+                            <TableView fx:id="solution"/>
+                        </VBox>
+                        <GridPane hgap="10" vgap="10">
+                                <Label text="Cena:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                <TextField fx:id="price" GridPane.columnIndex="1" GridPane.rowIndex="0" editable="false"/>
+                                <Label text="Jakość:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                <TextField fx:id="quality" GridPane.columnIndex="1" GridPane.rowIndex="1" editable="false"/>
+                        </GridPane>
+                    </HBox>
                     <HBox spacing="20">
                         <Button fx:id="run" text="Uruchom" />
                         <Button fx:id="clear" text="Wyczyść log"/>
