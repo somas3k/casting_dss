@@ -9,9 +9,19 @@ public class WeightedNormalizedScalar implements Function {
     private final double weight;
     private final double minValue;
     private final double maxValue;
+    private final boolean reverse;
 
     @Override
     public double evaluate(ProductionParameters parameters) {
-        return ((fun.evaluate(parameters) - minValue) / (maxValue - minValue)) * weight;
+
+        double normalized = (fun.evaluate(parameters) - minValue) / (maxValue - minValue);
+        if (reverse) {
+            normalized = 1.0 - normalized;
+        }
+        return normalized * weight;
+    }
+
+    public double evaluateFromFunction(ProductionParameters parameters) {
+        return fun.evaluate(parameters);
     }
 }

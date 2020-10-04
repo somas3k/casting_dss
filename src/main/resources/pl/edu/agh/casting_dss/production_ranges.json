@@ -1,0 +1,68 @@
+[
+  {
+    "paramName": "C",
+    "minimum": 3.2,
+    "maximum": 3.6,
+    "weight": 1.0
+  },
+  {
+    "paramName": "Si",
+    "minimum": 2.3,
+    "maximum": 2.7,
+    "weight": 3.0
+  },
+  {
+    "paramName": "Mn",
+    "minimum": 0,
+    "maximum": 0.4,
+    "weight": 4.0
+  },
+  {
+    "paramName": "Mg",
+    "minimum": 0.035,
+    "maximum": 0.08,
+    "weight": 2.0
+  },
+  {
+    "paramName": "Cu",
+    "minimum": 0,
+    "maximum": 0.8,
+    "weight": 7.0
+  },
+  {
+    "paramName": "Ni",
+    "minimum": 0,
+    "maximum": 2,
+    "weight": 6.0
+  },
+  {
+    "paramName": "Mo",
+    "minimum": 0,
+    "maximum": 0.3,
+    "weight": 4.0
+  },
+  {
+    "paramName": "aust_temp",
+    "minimum": 860,
+    "maximum": 950,
+    "weight": 9.0
+  },
+  {
+    "paramName": "aust_czas",
+    "minimum": 60,
+    "maximum": 240,
+    "weight": 8.0
+  },
+  {
+    "paramName": "ausf_temp",
+    "minimum": 260,
+    "maximum": 400,
+    "weight": 11.0
+  },
+  {
+    "paramName": "ausf_czas",
+    "minimum": 30,
+    "maximum": 180,
+    "weight": 10.0
+  }
+]

@@ -6,55 +6,39 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Setter
 @Getter
 @NoArgsConstructor
 public class ProductionParameters {
-    @JsonAlias({"composition", "chemicalComposition"})
-    private ChemicalComposition composition;
-    @JsonAlias({"aust_temp", "austTemp"})
-    private int austTemp;
-    @JsonAlias({"aust_czas", "austTime"})
-    private int austTime;
-    @JsonAlias({"ausf_temp", "ausfTemp"})
-    private int ausfTemp;
-    @JsonAlias({"ausf_czas", "ausfTime"})
-    private int ausfTime;
+    private Map<String, Double> chemicalComposition;
+    private Map<String, Integer> heatTreatment;
     @JsonAlias({"grubosc"})
     private int thickness;
+    private Map<String, Number> otherParameters = new HashMap<>();
 
-    private Map<String, Object> otherParameters = new HashMap<>();
-
-    public ProductionParameters(ChemicalComposition composition, int austTemp, int austTime, int ausfTemp, int ausfTime, int thickness) {
-        this.composition = composition;
-        this.austTemp = austTemp;
-        this.austTime = austTime;
-        this.ausfTemp = ausfTemp;
-        this.ausfTime = ausfTime;
+    public ProductionParameters(Map<String, Double> chemicalComposition, Map<String, Integer> heatTreatment, int thickness) {
+        this.chemicalComposition = chemicalComposition;
+        this.heatTreatment = heatTreatment;
         this.thickness = thickness;
     }
 
     @JsonAnyGetter
-    public Map<String, Object> otherParameters() {
+    public Map<String, Number> otherParameters() {
         return otherParameters;
     }
 
     @JsonAnySetter
-    public void setOtherParameter(String name, Object value) {
+    public void setOtherParameter(String name, Number value) {
         otherParameters.put(name, value);
     }
 
     public ProductionParameters(ProductionParameters parameters) {
-        this.composition = parameters.composition;
-        this.austTemp = parameters.austTemp;
-        this.austTime = parameters.austTime;
-        this.ausfTemp = parameters.ausfTemp;
-        this.ausfTime = parameters.ausfTime;
+        this.chemicalComposition = new HashMap<>(parameters.chemicalComposition);
+        this.heatTreatment = new HashMap<>(parameters.heatTreatment);
         this.thickness = parameters.thickness;
         this.otherParameters = parameters.otherParameters;
     }
@@ -64,28 +48,45 @@ public class ProductionParameters {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductionParameters that = (ProductionParameters) o;
-        return austTemp == that.austTemp &&
-                austTime == that.austTime &&
-                ausfTemp == that.ausfTemp &&
-                ausfTime == that.ausfTime &&
-                composition.equals(that.composition);
+        return heatTreatment.equals(that.heatTreatment) &&
+                chemicalComposition.equals(that.chemicalComposition) &&
+                thickness == that.thickness &&
+                otherParameters.equals(that.otherParameters);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(composition, austTemp, austTime, ausfTemp, ausfTime);
+        return Objects.hash(chemicalComposition, heatTreatment, thickness, otherParameters);
     }
 
     @Override
     public String toString() {
         return "ProductionParameters{" +
-                "composition=" + composition +
-                ", austTemp=" + austTemp +
-                ", austTime=" + austTime +
-                ", ausfTemp=" + ausfTemp +
-                ", ausfTime=" + ausfTime +
+                "chemicalComposition=" + chemicalComposition +
+                ", heatTreatment=" + heatTreatment +
                 ", thickness=" + thickness +
                 ", otherParameters=" + otherParameters +
                 '}';
+    }
+
+    public Number getParameterValue(String parameterName) {
+        if (chemicalComposition.containsKey(parameterName)) {
+            return chemicalComposition.get(parameterName);
+        }
+        if (heatTreatment.containsKey(parameterName)) {
+            return heatTreatment.get(parameterName);
+        }
+        if (otherParameters.containsKey(parameterName)) {
+            return otherParameters.get(parameterName);
+        }
+        return null;
+    }
+
+    public List<String> getAllParameterNames() {
+        List<String> parameterNames = new ArrayList<>(chemicalComposition.keySet());
+        parameterNames.remove("id");
+        parameterNames.addAll(heatTreatment.keySet());
+        parameterNames.addAll(otherParameters.keySet());
+        return parameterNames;
     }
 }

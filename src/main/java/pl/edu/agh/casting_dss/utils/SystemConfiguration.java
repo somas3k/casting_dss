@@ -13,7 +13,6 @@ import java.util.Map;
 @NoArgsConstructor
 public class SystemConfiguration {
     private Map<MechanicalProperty, ModelConfiguration> modelWithInputConfigurationPaths;
-
     private String possibleValuesPath;
 
     public String getModelPath(MechanicalProperty property) {

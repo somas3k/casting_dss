@@ -3,61 +3,87 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.edu.agh.casting_dss.gui.controller.MainController">
-    <TabPane layoutX="51.0" layoutY="14.0" prefHeight="229.0" prefWidth="236.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0"
+            prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="pl.edu.agh.casting_dss.gui.controller.MainController">
+    <TabPane layoutX="51.0" layoutY="14.0" prefHeight="229.0" prefWidth="236.0" tabClosingPolicy="UNAVAILABLE"
+             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+             AnchorPane.topAnchor="0.0">
         <Tab text="Konfiguracja">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <Pane AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+                <Pane AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
+                      AnchorPane.topAnchor="20">
                     <VBox spacing="20">
-                        <HBox alignment="CENTER" spacing="10">
-                            <Label text="Koszt" />
-                            <Slider fx:id="costQualityProportion" blockIncrement="0.05" majorTickUnit="0.5" max="1" minorTickCount="5" showTickLabels="true" showTickMarks="true" value="0.5" />
-                            <Label text="Jakość" />
-                            <Label fx:id="costQualityPropValue" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Koszt"/>
+                            <Slider fx:id="costQualityProportion" blockIncrement="0.05" majorTickUnit="0.5" max="1"
+                                    minorTickCount="5" showTickLabels="true" showTickMarks="true" value="0.5"/>
+                            <Label text="Jakość"/>
+                            <Label fx:id="costQualityPropValue"/>
                         </HBox>
-                        <HBox alignment="CENTER" spacing="10">
-                            <Label text="Grubość" />
-                            <TextField fx:id="thickness" />
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Grubość"/>
+                            <TextField fx:id="thickness"/>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="Norma"/>
+                            <ComboBox fx:id="norm"/>
                         </HBox>
                     </VBox>
                 </Pane>
             </AnchorPane>
         </Tab>
+        <Tab text="Norma">
+            <AnchorPane>
+                <VBox spacing="20" AnchorPane.bottomAnchor="20" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Przedział grubości"/>
+                        <ComboBox fx:id="thicknessRangeChooser"/>
+                    </HBox>
+                    <TableView fx:id="norms"/>
+                </VBox>
+            </AnchorPane>
+        </Tab>
         <Tab text="Parametry funkcji kosztu">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <Pane AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="20">
+                <Pane AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
+                      AnchorPane.topAnchor="20">
                     <GridPane hgap="10" vgap="10">
-                        <Label text="Średnia cena żeliwa" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <TextField fx:id="avgIronCost" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <Label text="Średnia waga wsadu" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                        <TextField fx:id="avgBatchWeight" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label text="Cena niklu" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                        <TextField fx:id="niPrice" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                        <Label text="Cena miedzi" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                        <TextField fx:id="cuPrice" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                        <Label text="Cena molibdenu" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                        <TextField fx:id="moPrice" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <columnConstraints>
-                     <ColumnConstraints />
-                     <ColumnConstraints />
-                  </columnConstraints>
-                  <rowConstraints>
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                     <RowConstraints />
-                  </rowConstraints>
+                        <Label text="Średnia cena żeliwa" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                        <TextField fx:id="avgIronCost" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        <Label text="Średnia waga wsadu" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                        <TextField fx:id="avgBatchWeight" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Label text="Cena niklu" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                        <TextField fx:id="niPrice" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Label text="Cena miedzi" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                        <TextField fx:id="cuPrice" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Label text="Cena molibdenu" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                        <TextField fx:id="moPrice" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                        <columnConstraints>
+                            <ColumnConstraints/>
+                            <ColumnConstraints/>
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints/>
+                            <RowConstraints/>
+                            <RowConstraints/>
+                            <RowConstraints/>
+                            <RowConstraints/>
+                        </rowConstraints>
                     </GridPane>
                 </Pane>
             </AnchorPane>
         </Tab>
         <Tab text="Zakresy produkcyjne">
-
+            <AnchorPane>
+                <TableView AnchorPane.rightAnchor="100" AnchorPane.leftAnchor="100" AnchorPane.topAnchor="20"
+                           AnchorPane.bottomAnchor="20" fx:id="productionRanges"/>
+            </AnchorPane>
         </Tab>
         <Tab text="Uruchamianie algorytmu">
             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                <VBox spacing="20" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
+                <VBox spacing="20" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10"
+                      AnchorPane.topAnchor="10">
                     <HBox spacing="20">
                         <VBox spacing="20">
                             <HBox spacing="20">
@@ -68,17 +94,38 @@
                             <TableView fx:id="solution"/>
                         </VBox>
                         <GridPane hgap="10" vgap="10">
-                                <Label text="Cena:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                                <TextField fx:id="price" GridPane.columnIndex="1" GridPane.rowIndex="0" editable="false"/>
-                                <Label text="Jakość:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                                <TextField fx:id="quality" GridPane.columnIndex="1" GridPane.rowIndex="1" editable="false"/>
+                            <Label text="Cena:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                            <Label text="Jakość:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                            <Label text="Rm" GridPane.rowIndex="2"/>
+                            <Label text="Rp02" GridPane.rowIndex="3"/>
+                            <Label text="A5" GridPane.rowIndex="4"/>
+                            <Label text="HB" GridPane.rowIndex="5"/>
+                            <TextField fx:id="price" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                            <TextField fx:id="quality" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            <TextField fx:id="rm" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            <TextField fx:id="rp02" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                            <TextField fx:id="a5" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                            <TextField fx:id="hb" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                            <columnConstraints>
+                                <ColumnConstraints/>
+                                <ColumnConstraints/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints/>
+                                <RowConstraints/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0"/>
+                            </rowConstraints>
                         </GridPane>
                     </HBox>
                     <HBox spacing="20">
-                        <Button fx:id="run" text="Uruchom" />
+                        <Button fx:id="run" text="Uruchom"/>
+                        <Button fx:id="stop" text="Zatrzymaj"/>
                         <Button fx:id="clear" text="Wyczyść log"/>
                     </HBox>
-                    <TextArea VBox.vgrow="ALWAYS" fx:id="searchingLog" editable="false" />
+                    <TextArea fx:id="searchingLog" editable="false" VBox.vgrow="ALWAYS"/>
                 </VBox>
             </AnchorPane>
         </Tab>

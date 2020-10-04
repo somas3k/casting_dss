@@ -1,16 +1,19 @@
 package pl.edu.agh.casting_dss.criterions;
 
-import pl.edu.agh.casting_dss.data.ChemicalComposition;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 
-public class CostFunction implements Function {
-    private final double avgIronCost;
-    private final double avgBatchWeight;
-    private final double niCost;
-    private final double cuCost;
-    private final double moCost;
+import java.util.Map;
 
-    public CostFunction(float avgIronCost, float avgBatchWeight, float niCost, float cuCost, float moCost) {
+public class CostFunction implements Function {
+    private final ObjectProperty<Double> avgIronCost;
+    private final ObjectProperty<Double> avgBatchWeight;
+    private final ObjectProperty<Double> niCost;
+    private final ObjectProperty<Double> cuCost;
+    private final ObjectProperty<Double> moCost;
+
+    public CostFunction(ObjectProperty<Double> avgIronCost, ObjectProperty<Double> avgBatchWeight, ObjectProperty<Double> niCost, ObjectProperty<Double> cuCost, ObjectProperty<Double> moCost) {
         this.avgIronCost = avgIronCost;
         this.avgBatchWeight = avgBatchWeight;
         this.niCost = niCost;
@@ -20,14 +23,14 @@ public class CostFunction implements Function {
 
     @Override
     public double evaluate(ProductionParameters parameters) {
-        double chemCompIncrease = getChemCompIncrease(parameters.getComposition());
-        double austTempIncrease = getAustTempIncrease(parameters.getAustTemp());
-        double austTimeIncrease = getAustTimeIncrease(parameters.getAustTime());
-        double ausfTempIncrease = getAusfTempIncrease(parameters.getAusfTemp());
-        double ausfTimeIncrease = getAusfTimeIncrease(parameters.getAusfTime());
-        return avgIronCost *
+        double chemCompIncrease = getChemCompIncrease(parameters.getChemicalComposition());
+        double austTempIncrease = getAustTempIncrease(parameters.getHeatTreatment().get("aust_temp"));
+        double austTimeIncrease = getAustTimeIncrease(parameters.getHeatTreatment().get("aust_czas"));
+        double ausfTempIncrease = getAusfTempIncrease(parameters.getHeatTreatment().get("ausf_temp"));
+        double ausfTimeIncrease = getAusfTimeIncrease(parameters.getHeatTreatment().get("ausf_czas"));
+        return avgIronCost.getValue() *
                 (1 + (chemCompIncrease + austTempIncrease + austTimeIncrease + ausfTempIncrease + ausfTimeIncrease) / 100) *
-                avgBatchWeight;
+                avgBatchWeight.getValue();
     }
 
     private double getAusfTimeIncrease(int ausfTime) {
@@ -67,7 +70,7 @@ public class CostFunction implements Function {
         return (((1.0 - 0.7) * (austTemp - 890)) / (950 - 890)) + 0.7;
     }
 
-    public double getChemCompIncrease(ChemicalComposition composition) {
-        return (((composition.getNi() / 100) * niCost + (composition.getCu() / 100) * cuCost + (composition.getMo() / 100) * moCost) / avgIronCost) * 100;
+    public double getChemCompIncrease(Map<String, Double> composition) {
+        return (((composition.get("Ni") / 100) * niCost.getValue() + (composition.get("Cu") / 100) * cuCost.getValue() + (composition.get("Mo") / 100) * moCost.getValue()) / avgIronCost.getValue()) * 100;
     }
 }

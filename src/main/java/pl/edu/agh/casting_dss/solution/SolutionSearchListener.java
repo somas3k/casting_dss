@@ -10,29 +10,36 @@ import org.jamesframework.core.search.LocalSearch;
 import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.status.SearchStatus;
+import pl.edu.agh.casting_dss.gui.model.DSSModel;
+import pl.edu.agh.casting_dss.single_criteria_opt.DetailedEvaluation;
 import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
 
 public class SolutionSearchListener implements SearchListener<OptimizedADISolution> {
 
     private final TextArea searchingLog;
+    private final DSSModel model;
+    private int stepStep = 100;
 
-    public SolutionSearchListener(TextArea searchingLog) {
+    public SolutionSearchListener(TextArea searchingLog, DSSModel model) {
         this.searchingLog = searchingLog;
+        this.model = model;
     }
 
     @Override
     public void searchStarted(Search<? extends OptimizedADISolution> search) {
-        addNewLine("Searching started");
+        addNewLine("Przeszukiwanie rozpoczęte");
     }
 
     @Override
     public void searchStopped(Search<? extends OptimizedADISolution> search) {
-        addNewLine("Searching stopped");
+        addNewLine("Przeszukiwanie zakończone");
     }
 
     @Override
     public void newBestSolution(Search<? extends OptimizedADISolution> search, OptimizedADISolution newBestSolution, Evaluation newBestSolutionEvaluation, Validation newBestSolutionValidation) {
-        addNewLine("New best solution found");
+        DetailedEvaluation evaluation = (DetailedEvaluation) newBestSolutionEvaluation;
+        addNewLine(String.format("Znaleziono nowe najlepsze rozwiązanie, koszt: %.2f, jakość: %.2f", evaluation.getCostValue(), evaluation.getQualityValue()));
+        Platform.runLater(() -> model.setActualSolution(newBestSolution.getProductionParameters()));
     }
 
     @Override
@@ -42,14 +49,17 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
 
     @Override
     public void stepCompleted(Search<? extends OptimizedADISolution> search, long numSteps) {
-        if (numSteps % 100 == 0) {
-            addNewLine("Step " + numSteps + " completed");
+        if (numSteps % stepStep == 0) {
+            addNewLine("Krok " + numSteps + " zakończony");
+            if (numSteps > 1000) {
+                stepStep = 1000;
+            }
         }
     }
 
     @Override
     public void statusChanged(Search<? extends OptimizedADISolution> search, SearchStatus newStatus) {
-        addNewLine("Status changed to: " + newStatus);
+        //addNewLine("Zmiana statusu: " + newStatus);
     }
 
     private void addNewLine(String text) {

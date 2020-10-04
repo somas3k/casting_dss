@@ -1,24 +1,37 @@
 package pl.edu.agh.casting_dss.single_criteria_opt;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import pl.edu.agh.casting_dss.data.MechanicalProperties;
 import lombok.AllArgsConstructor;
+import pl.edu.agh.casting_dss.data.NormType;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import org.jamesframework.core.problems.constraints.Constraint;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
 
 @AllArgsConstructor
-public class NormConstraints implements Constraint<OptimizedADISolution, MechanicalPropertiesModel> {
-//    private float rmMin;
-//    private float rp02Min;
-//    private float a5Min;
-    private final float hbMin;
-    private final float hbMax;
-//    private float kMin;
+@Setter
+@Getter
+@NoArgsConstructor
+public class NormConstraint implements Constraint<OptimizedADISolution, MechanicalPropertiesModel> {
+    private NormType type;
+    private Double rmMin;
+    private Double rp02Min;
+    private Double a5Min;
+    private Double hbMin;
+    private Double hbMax;
+    @JsonAlias("kMin")
+    private Double kkMin;
     private static final SimpleValidation TRUE = new SimpleValidation(true);
     private static final SimpleValidation FALSE = new SimpleValidation(false);
 
-
+    public NormConstraint(double hbMin, double hbMax) {
+        this.hbMin = hbMin;
+        this.hbMax = hbMax;
+    }
 
     @Override
     public Validation validate(OptimizedADISolution optimizedADISolution, MechanicalPropertiesModel model) {
@@ -40,5 +53,9 @@ public class NormConstraints implements Constraint<OptimizedADISolution, Mechani
             return TRUE;
         }
         return FALSE;
+    }
+
+    public boolean normHasAllRequiredValues() {
+        return rmMin != null && rp02Min != null && hbMin != null && hbMax != null && kkMin != null;
     }
 }

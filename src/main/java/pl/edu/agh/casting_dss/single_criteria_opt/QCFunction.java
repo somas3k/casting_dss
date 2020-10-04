@@ -14,10 +14,9 @@ public class QCFunction implements Objective<OptimizedADISolution, MechanicalPro
     private final WeightedNormalizedScalar quality;
 
     @Override
-    public Evaluation evaluate(OptimizedADISolution optimizedADISolution, MechanicalPropertiesModel model) {
+    public DetailedEvaluation evaluate(OptimizedADISolution optimizedADISolution, MechanicalPropertiesModel model) {
         ProductionParameters parameters = optimizedADISolution.getProductionParameters();
-//        return SimpleEvaluation.WITH_VALUE(cost.evaluate(parameters) + quality.evaluate(parameters));
-        return SimpleEvaluation.WITH_VALUE(cost.evaluate(parameters));
+        return new DetailedEvaluation(cost.evaluate(parameters) + quality.evaluate(parameters), cost.evaluateFromFunction(parameters), quality.evaluateFromFunction(parameters));
     }
 
 

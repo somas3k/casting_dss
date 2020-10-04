@@ -2,6 +2,8 @@ package pl.edu.agh.casting_dss.utils;
 
 import javafx.scene.control.TextFormatter;
 import javafx.util.StringConverter;
+import pl.edu.agh.casting_dss.criterions.Function;
+import pl.edu.agh.casting_dss.data.MechanicalProperties;
 
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
@@ -58,14 +60,28 @@ public class FormattingUtils {
     public static final StringConverter<Double> TWO_DECIMAL_CONVERTER = new StringConverter<>() {
         @Override
         public String toString(Double value) {
-            return String.format("%.2f", value);
+            return value != null ? String.format("%.2f", value) : null;
         }
 
         @Override
         public Double fromString(String s) {
-            return Double.parseDouble(s);
+            return !s.equals("") ? Double.parseDouble(s) : null;
         }
     };
+
+    public static StringConverter<MechanicalProperties> getConverterForField(java.util.function.Function<MechanicalProperties, Double> getter) {
+        return new StringConverter<>() {
+            @Override
+            public String toString(MechanicalProperties value) {
+                return String.format("%.2f", getter.apply(value));
+            }
+
+            @Override
+            public MechanicalProperties fromString(String s) {
+                return null;
+            }
+        };
+    }
     public static TextFormatter<Double> getDoubleTextFormatter() {
         return new TextFormatter<>(DOUBLE_CONVERTER, 0.0, FILTER_DOUBLE);
     }

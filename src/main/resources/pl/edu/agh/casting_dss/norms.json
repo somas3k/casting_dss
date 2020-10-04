@@ -1,0 +1,141 @@
+{
+  "norms": {
+    "t<=30": [
+      {
+        "type": "GJS_800_10",
+        "rmMin": 800,
+        "rp02Min": 500,
+        "a5Min": 10,
+        "hbMin": 250,
+        "hbMax": 310,
+        "kMin": 110
+      },
+      {
+        "type": "GJS_900_8",
+        "rmMin": 900,
+        "rp02Min": 600,
+        "a5Min": 8,
+        "hbMin": 280,
+        "hbMax": 340,
+        "kMin": 100
+      },
+      {
+        "type": "GJS_1050_6",
+        "rmMin": 1050,
+        "rp02Min": 700,
+        "a5Min": 6,
+        "hbMin": 320,
+        "hbMax": 380,
+        "kMin": 80
+      },
+      {
+        "type": "GJS_1200_3",
+        "rmMin": 1200,
+        "rp02Min": 850,
+        "a5Min": 3,
+        "hbMin": 340,
+        "hbMax": 420,
+        "kMin": 60
+      },
+      {
+        "type": "GJS_1400_1",
+        "rmMin": 1400,
+        "rp02Min": 1100,
+        "a5Min": 1,
+        "hbMin": 380,
+        "hbMax": 480,
+        "kMin": 35
+      }
+    ],
+    "30<t<=60": [
+      {
+        "type": "GJS_800_10",
+        "rmMin": 750,
+        "rp02Min": 500,
+        "a5Min": 6,
+        "hbMin": 250,
+        "hbMax": 310,
+        "kMin": 110
+      },
+      {
+        "type": "GJS_900_8",
+        "rmMin": 850,
+        "rp02Min": 600,
+        "a5Min": 5,
+        "hbMin": 280,
+        "hbMax": 340,
+        "kMin": 100
+      },
+      {
+        "type": "GJS_1050_6",
+        "rmMin": 1000,
+        "rp02Min": 700,
+        "a5Min": 4,
+        "hbMin": 320,
+        "hbMax": 380,
+        "kMin": 80
+      },
+      {
+        "type": "GJS_1200_3",
+        "rmMin": 1170,
+        "rp02Min": 850,
+        "a5Min": 2,
+        "hbMin": 340,
+        "hbMax": 420,
+        "kMin": 60
+      },
+      {
+        "type": "GJS_1400_1",
+        "rp02Min": 1100,
+        "hbMin": 380,
+        "hbMax": 480,
+        "kMin": 35
+      }
+    ],
+    "60<t<=100": [
+      {
+        "type": "GJS_800_10",
+        "rmMin": 720,
+        "rp02Min": 500,
+        "a5Min": 5,
+        "hbMin": 250,
+        "hbMax": 310,
+        "kMin": 110
+      },
+      {
+        "type": "GJS_900_8",
+        "rmMin": 820,
+        "rp02Min": 600,
+        "a5Min": 4,
+        "hbMin": 280,
+        "hbMax": 340,
+        "kMin": 100
+      },
+      {
+        "type": "GJS_1050_6",
+        "rmMin": 970,
+        "rp02Min": 700,
+        "a5Min": 3,
+        "hbMin": 320,
+        "hbMax": 380,
+        "kMin": 80
+      },
+      {
+        "type": "GJS_1200_3",
+        "rmMin": 1140,
+        "rp02Min": 850,
+        "a5Min": 1,
+        "hbMin": 340,
+        "hbMax": 420,
+        "kMin": 60
+      },
+      {
+        "type": "GJS_1400_1",
+        "rp02Min": 1100,
+        "hbMin": 380,
+        "hbMax": 480,
+        "kMin": 35
+      }
+    ]
+  }
+}

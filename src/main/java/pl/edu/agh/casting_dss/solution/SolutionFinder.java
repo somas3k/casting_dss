@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jamesframework.core.problems.GenericProblem;
-import org.jamesframework.core.search.algo.tabu.FullTabuMemory;
-import org.jamesframework.core.search.algo.tabu.TabuSearch;
+import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.listeners.SearchListener;
 import org.jamesframework.core.search.stopcriteria.MaxRuntime;
 import pl.edu.agh.casting_dss.criterions.CostFunction;
@@ -22,58 +21,57 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static pl.edu.agh.casting_dss.solution.SearchType.EXHAUSTIVE_SEARCH;
+import static pl.edu.agh.casting_dss.solution.SearchType.TABU_SEARCH;
+
 @Setter
 @Getter
 public class SolutionFinder {
     private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     private final ADISolutionGenerator generator;
-    private int thickness;
-    private NormConstraints constraints;
-    private CostFunction costFunction = new CostFunction(14.0f, 250.0f, 45f, 30f, 15f);
-    private QualityFunction qualityFunction = new QualityFunction();
+    private CostFunction costFunction;
+    private QualityFunction qualityFunction;
     private MechanicalPropertiesModel model;
 
-    public SolutionFinder(int thickness, NormConstraints constraints, MechanicalPropertiesModel model) {
-        this.constraints = constraints;
-        this.thickness = thickness;
-        this.generator = new ADISolutionGenerator(thickness, constraints);
+    public SolutionFinder(ADISolutionGenerator generator, MechanicalPropertiesModel model, CostFunction cFunction, QualityFunction qFunction) {
+        this.generator = generator;
         this.model = model;
+        this.costFunction = cFunction;
+        this.qualityFunction = qFunction;
     }
 
     public ProductionParameters findRandomSolution() {
         return generator.create(new Random(), model).getProductionParameters();
     }
 
-    public void findSolution(DSSModel dssModel, SearchListener<OptimizedADISolution> listener) {
-        Pair<Double, Double> minMaxCost = CostUtils.getMinMaxCost(costFunction, model.getPossibleValues(), thickness);
+    public Search<OptimizedADISolution> findSolution(DSSModel dssModel, SearchListener<OptimizedADISolution> listener) {
+        Pair<Double, Double> minMaxCost = CostUtils.getMinMaxCost(costFunction, model.getPossibleValues(), dssModel.getThickness());
 
         QCFunction qcFun = new QCFunction(
                 new WeightedNormalizedScalar(
                         costFunction,
                         (1.0 - dssModel.getCostQualityProportion()) * 100,
                         minMaxCost.getLeft(),
-                        minMaxCost.getRight()),
+                        minMaxCost.getRight(),
+                        false),
                 new WeightedNormalizedScalar(
                         qualityFunction,
                         dssModel.getCostQualityProportion() * 100,
-                        0.0,
-                        0.0
+                        qualityFunction.getMinValue(),
+                        qualityFunction.getMaxValue(),
+                        true
                 )
         );
 
         GenericProblem<OptimizedADISolution, MechanicalPropertiesModel> problem = new GenericProblem<>(model, qcFun, generator);
-        problem.addMandatoryConstraint(constraints);
-        TabuSearch<OptimizedADISolution> search = new TabuSearch<>(problem, new ProdParamsNeighborhood(model.getPossibleValues()), new FullTabuMemory<>(200));
-        search.addStopCriterion(new MaxRuntime(20, TimeUnit.SECONDS));
-//        Search<OptimizedADISolution> search = new RandomSearch<>(problem);
-//        search.addStopCriterion(new MaxSteps(10000));
+        problem.addMandatoryConstraint(dssModel.calculateMatchingNorm());
+        Search<OptimizedADISolution> search = SearchAlgorithmsFactory.getSearchAlgorithm(problem, EXHAUSTIVE_SEARCH, model.getPossibleValues(), new OptimizedADISolution(dssModel.getActualSolutionParameters()));
+        search.addStopCriterion(new MaxRuntime(60, TimeUnit.SECONDS));
         search.addSearchListener(listener);
         EXECUTOR_SERVICE.execute(() -> {
             search.start();
-            OptimizedADISolution bestSolution = search.getBestSolution();
-            System.out.println(bestSolution);
-            System.out.println(costFunction.evaluate(bestSolution.getProductionParameters()));
             search.dispose();
         });
+        return search;
     }
 }

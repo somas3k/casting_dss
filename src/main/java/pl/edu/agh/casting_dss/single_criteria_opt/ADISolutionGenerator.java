@@ -1,33 +1,38 @@
 package pl.edu.agh.casting_dss.single_criteria_opt;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import org.jamesframework.core.problems.sol.RandomSolutionGenerator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @AllArgsConstructor
+@Setter
 public class ADISolutionGenerator implements RandomSolutionGenerator<OptimizedADISolution, MechanicalPropertiesModel> {
-    private final int thickness;
-    private final NormConstraints constraints;
-
+    private int thickness;
+    private NormConstraint constraint;
 
     @Override
-    public OptimizedADISolution create(Random random, MechanicalPropertiesModel model) {
+    public synchronized OptimizedADISolution create(Random random, MechanicalPropertiesModel model) {
         OptimizedADISolution optimizedADISolution;
 
         do {
             optimizedADISolution = new OptimizedADISolution(new ProductionParameters(
                     getRandomElementFromList(model.getPossibleValues().getChemicalCompositions(), random),
-                    getRandomElementFromList(model.getPossibleValues().getPossibleAustTemps(), random),
-                    getRandomElementFromList(model.getPossibleValues().getPossibleAustTimes(), random),
-                    getRandomElementFromList(model.getPossibleValues().getPossibleAusfTemps(), random),
-                    getRandomElementFromList(model.getPossibleValues().getPossibleAusfTimes(), random),
+                    new HashMap<>(Map.of(
+                            "aust_temp", getRandomElementFromList(model.getPossibleValues().getPossibleAustTemps(), random),
+                            "aust_czas", getRandomElementFromList(model.getPossibleValues().getPossibleAustTimes(), random),
+                            "ausf_temp", getRandomElementFromList(model.getPossibleValues().getPossibleAusfTemps(), random),
+                            "ausf_czas", getRandomElementFromList(model.getPossibleValues().getPossibleAusfTimes(), random)
+                    )),
                     thickness)
             );
-        } while (!constraints.validate(optimizedADISolution, model).passed());
+        } while (!constraint.validate(optimizedADISolution, model).passed());
 
         return optimizedADISolution;
     }

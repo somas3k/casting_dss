@@ -8,17 +8,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import lombok.Getter;
-import pl.edu.agh.casting_dss.data.MechanicalProperties;
-import pl.edu.agh.casting_dss.data.PossibleValues;
+import pl.edu.agh.casting_dss.criterions.CostFunction;
+import pl.edu.agh.casting_dss.criterions.ProductionRange;
+import pl.edu.agh.casting_dss.criterions.QualityFunction;
+import pl.edu.agh.casting_dss.data.*;
 import pl.edu.agh.casting_dss.factories.ModelLoadingException;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import pl.edu.agh.casting_dss.model.Model;
-import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraints;
+import pl.edu.agh.casting_dss.single_criteria_opt.ADISolutionGenerator;
+import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraint;
 import pl.edu.agh.casting_dss.solution.SolutionFinder;
 import pl.edu.agh.casting_dss.utils.SystemConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import static pl.edu.agh.casting_dss.factories.PossibleValuesFactory.POSSIBLE_VALUES_FACTORY;
@@ -36,34 +41,92 @@ public class DSSModel {
     private final ObjectProperty<Double> actualPrice = new SimpleObjectProperty<>(0.0);
     private final ObjectProperty<Double> actualQuality = new SimpleObjectProperty<>(0.0);
     private final DoubleProperty costQualityProportionProperty = new SimpleDoubleProperty(0.5);
-    private final ObservableList<ProductionParameters> actualSolution = FXCollections.observableArrayList(new ProductionParameters());
-    private final NormConstraints constraints = new NormConstraints(280, 320);
+    private final ObjectProperty<MechanicalProperties> mechanicalPropertiesProperty = new SimpleObjectProperty<>(new MechanicalProperties());
+    private final ObjectProperty<NormType> selectedNormType = new SimpleObjectProperty<>(NormType.GJS_800_10);
+    private final ObjectProperty<NormConstraint> matchingNormProperty = new SimpleObjectProperty<>();
+    private final ObservableList<ProductionParametersModel> actualSolution = FXCollections.observableArrayList();
     private final SolutionFinder finder;
+    private final ObservableList<ProductionRange> ranges;
+    private final Norms norms;
+    private final ADISolutionGenerator generator;
 
-    public DSSModel(SystemConfiguration configuration) throws IOException, ModelLoadingException {
+    public DSSModel(SystemConfiguration configuration, List<ProductionRange> ranges, Norms norms) throws IOException, ModelLoadingException {
+        this.ranges = FXCollections.observableArrayList(ranges);
+        this.norms = norms;
+        matchingNormProperty.setValue(calculateMatchingNorm());
+        selectedNormType.addListener((observableValue, normType, t1) -> matchingNormProperty.set(calculateMatchingNorm()));
         PossibleValues possibleValues = POSSIBLE_VALUES_FACTORY.getFromFile(new File(configuration.getPossibleValuesPath()));
         Model hbModel = XGB_MODEL_FACTORY.getHBModel(
                 new File(configuration.getModelPath(HB)),
                 new File(configuration.getModelInputConfigurationPath(HB)));
         MechanicalPropertiesModel model = new MechanicalPropertiesModel(possibleValues, hbModel);
-        finder = new SolutionFinder(thicknessProperty.getValue(), constraints, model);
-        actualSolution.addListener((ListChangeListener<ProductionParameters>) change -> {
-            if (change.getList().size() == 1)
-                updateCostAndQuality(() -> change.getList().get(0));
+        generator = new ADISolutionGenerator(thicknessProperty.getValue(), matchingNormProperty.get());
+        finder = new SolutionFinder(
+                generator,
+                model,
+                new CostFunction(avgIronCostProperty, avgBatchWeightProperty, niPriceProperty, cuPriceProperty, moPriceProperty),
+                new QualityFunction(this.ranges));
+        thicknessProperty.addListener((observableValue, integer, t1) -> {
+            matchingNormProperty.setValue(calculateMatchingNorm());
+            generator.setThickness(t1);
         });
+        matchingNormProperty.addListener((observableValue, normConstraint, t1) -> generator.setConstraint(t1));
+        actualSolution.addListener((ListChangeListener<ProductionParametersModel>) change -> {
+            if (change.getList().size() == 1) {
+                updateCostAndQuality(() -> change.getList().get(0));
+                try {
+                    mechanicalPropertiesProperty.setValue(finder.getModel().evaluateProductionParameters(change.getList().get(0).getParams()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        addListeners();
     }
 
-    private void updateCostAndQuality(Supplier<ProductionParameters> prodSupplier) {
-        pl.edu.agh.casting_dss.data.ProductionParameters params = prodSupplier.get().getParams();
-        actualPrice.setValue(finder.getCostFunction().evaluate(params));
-        actualQuality.setValue(finder.getQualityFunction().evaluate(params));
+    private Norms wrapListsWithObservableLists(Norms norms) {
+        Map<String, List<NormConstraint>> normsMap = norms.getNorms();
+        normsMap.replaceAll((k, v) -> FXCollections.observableArrayList(v));
+        return norms;
     }
 
-    public void generateRandomSolution() {
+    private void addListeners() {
+        avgIronCostProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+        avgBatchWeightProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+        niPriceProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+        moPriceProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+        cuPriceProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+        avgIronCostProperty.addListener((observableValue, aDouble, t1) -> updateCostAndQuality());
+    }
+
+    public void setActualSolution(ProductionParameters parameters) {
         actualSolution.clear();
-        ProductionParameters e = new ProductionParameters(finder.findRandomSolution());
+        ProductionParametersModel e = new ProductionParametersModel(parameters);
         e.addListenerToAllParameters((observableValue, number, t1) -> updateCostAndQuality(() -> actualSolution.get(0)));
         actualSolution.add(e);
+    }
+
+    private void updateCostAndQuality(Supplier<ProductionParametersModel> prodSupplier) {
+        ProductionParametersModel productionParametersModel = prodSupplier.get();
+        if (productionParametersModel != null) {
+            ProductionParameters params = productionParametersModel.getParams();
+            actualPrice.setValue(finder.getCostFunction().evaluate(params));
+            actualQuality.setValue(finder.getQualityFunction().evaluate(params));
+        }
+    }
+
+    public void updateCostAndQuality() {
+        updateCostAndQuality(() -> actualSolution.size() > 0 ? actualSolution.get(0) : null);
+    }
+
+    public ProductionParameters getActualSolutionParameters() {
+        if (actualSolution.size() == 0) {
+            generateRandomSolution();
+        }
+        return actualSolution.get(0).getParams();
+    }
+    public void generateRandomSolution() {
+        setActualSolution(finder.findRandomSolution());
     }
 
     public void setThickness(Integer thickness) {
@@ -133,5 +196,20 @@ public class DSSModel {
                 ", moPrice=" + getMoPrice() +
                 ", costQualityProportion=" + getCostQualityProportion() +
                 '}';
+    }
+
+    public NormConstraint calculateMatchingNorm() {
+        return norms.getNorms().get(getThicknessRange(getThickness())).stream()
+                .filter(normConstraint -> normConstraint.getType().equals(selectedNormType.getValue())).findAny().orElseThrow();
+    }
+
+    private String getThicknessRange(Integer thickness) {
+        if (thickness <= 30) {
+            return "t<=30";
+        }
+        if (thickness <= 60) {
+            return "30<t<=60";
+        }
+        return "60<t<=100";
     }
 }
