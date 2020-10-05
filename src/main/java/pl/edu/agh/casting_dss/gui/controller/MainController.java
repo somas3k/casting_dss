@@ -10,14 +10,17 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javafx.util.StringConverter;
 import org.jamesframework.core.search.Search;
+import org.jamesframework.core.search.listeners.SearchListener;
 import org.nd4j.common.io.StringUtils;
 import pl.edu.agh.casting_dss.data.NormType;
 import pl.edu.agh.casting_dss.criterions.ProductionRange;
 import pl.edu.agh.casting_dss.data.MechanicalProperties;
+import pl.edu.agh.casting_dss.data.ProductionParameters;
 import pl.edu.agh.casting_dss.gui.model.DSSModel;
 import pl.edu.agh.casting_dss.gui.model.ProductionParametersModel;
 import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraint;
 import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
+import pl.edu.agh.casting_dss.solution.SearchType;
 import pl.edu.agh.casting_dss.solution.SolutionSearchListener;
 
 import java.net.URL;
@@ -25,6 +28,8 @@ import java.util.*;
 import java.util.function.Function;
 
 import static pl.edu.agh.casting_dss.data.Norms.THICKNESS_RANGES_ORDER;
+import static pl.edu.agh.casting_dss.gui.model.ProductionParametersModel.chemicalCompositionParamNames;
+import static pl.edu.agh.casting_dss.gui.model.ProductionParametersModel.heatTreatmentParamNames;
 import static pl.edu.agh.casting_dss.utils.FormattingUtils.*;
 
 public class MainController implements Initializable {
@@ -48,10 +53,17 @@ public class MainController implements Initializable {
     public TextField rp02;
     public TextField a5;
     public TextField hb;
+    public TextField k;
     public TableView<ProductionRange> productionRanges;
     public ComboBox<NormType> norm;
     public TableView<NormConstraint> norms;
     public ComboBox<String> thicknessRangeChooser;
+    public Button clearSolution;
+    public Button saveSolution;
+    public Button restoreSolution;
+    public TextField maxRuntime;
+    public ComboBox<SearchType> algoChooser;
+    public Button enterSolution;
 
     private DSSModel model;
     private Search<OptimizedADISolution> searchReference;
@@ -61,6 +73,23 @@ public class MainController implements Initializable {
             throw new IllegalStateException("Model can only be initialized once");
         }
         this.model = model;
+        algoChooser.getItems().addAll(SearchType.values());
+        algoChooser.getSelectionModel().select(model.getSearchType());
+        algoChooser.getSelectionModel().selectedItemProperty().addListener((observableValue, searchType, t1) -> model.setSearchType(t1));
+        maxRuntime.textProperty().bindBidirectional(model.getMaxRuntime(), NATURAL_CONVERTER);
+        enterSolution.setOnMouseClicked(mouseEvent -> {
+            TextInputDialog dialog = new TextInputDialog(model.getActualSolutionModel().toString());
+            dialog.setTitle("Wprowadź rozwiązanie");
+            dialog.setHeaderText("Wprowadź swoje rozwiązanie w kolejności kolumn w tabeli, oddzielając każdą wartość spacją");
+            String solutionString = dialog.showAndWait().orElse(null);
+            ProductionParameters productionParameters = parseSolutionInput(solutionString);
+            if (productionParameters != null) {
+                model.setActualSolution(productionParameters);
+            }
+        });
+        clearSolution.setOnMouseClicked(mouseEvent -> model.clearSolution());
+        saveSolution.setOnMouseClicked(mouseEvent -> model.saveSolution());
+        restoreSolution.setOnMouseClicked(mouseEvent -> model.restoreSolution());
         costQualityProportion.valueProperty().bindBidirectional(model.getCostQualityProportionProperty());
         thickness.textProperty().bindBidirectional(model.getThicknessProperty(), NATURAL_CONVERTER);
         avgIronCost.textProperty().bindBidirectional(model.getAvgIronCostProperty(), DOUBLE_CONVERTER);
@@ -74,6 +103,7 @@ public class MainController implements Initializable {
         rp02.textProperty().bindBidirectional(model.getMechanicalPropertiesProperty(), getConverterForField(MechanicalProperties::getRp02));
         a5.textProperty().bindBidirectional(model.getMechanicalPropertiesProperty(), getConverterForField(MechanicalProperties::getA5));
         hb.textProperty().bindBidirectional(model.getMechanicalPropertiesProperty(), getConverterForField(MechanicalProperties::getHb));
+        k.textProperty().bindBidirectional(model.getMechanicalPropertiesProperty(), getConverterForField(MechanicalProperties::getK));
         initRanges(model.getRanges());
         initTable(model);
         thicknessRangeChooser.getItems().addAll(THICKNESS_RANGES_ORDER);
@@ -83,6 +113,26 @@ public class MainController implements Initializable {
         norm.getItems().addAll(NormType.values());
         norm.getSelectionModel().select(0);
         model.getSelectedNormType().bind(norm.getSelectionModel().selectedItemProperty());
+    }
+
+    private ProductionParameters parseSolutionInput(String solutionString) {
+        try {
+            String[] tokens = solutionString.split(" ");
+            Map<String, Double> cc = new HashMap<>();
+            Map<String, Integer> ht = new HashMap<>();
+            int ccSize = chemicalCompositionParamNames.size();
+            for (int i = 0; i < ccSize; i++) {
+                cc.put(chemicalCompositionParamNames.get(i), Double.parseDouble(tokens[i]));
+            }
+            int htSize = heatTreatmentParamNames.size();
+            for (int i = ccSize; i < ccSize + htSize; i++) {
+                ht.put(heatTreatmentParamNames.get(i - ccSize), Integer.parseInt(tokens[i]));
+            }
+            return new ProductionParameters(cc, ht, model.getThickness());
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Wprowadziłeś błędne dane");
+        }
+        return null;
     }
 
     private void initNorms() {
@@ -214,7 +264,7 @@ public class MainController implements Initializable {
     }
 
     private List<TableColumn<ProductionParametersModel, String>>  getChemicalCompositionColumns() {
-        List<TableColumn<ProductionParametersModel, String>> tableColumns = getTableColumns(ProductionParametersModel.chemicalCompositionParamNames, StringUtils::capitalize, TWO_DECIMAL_CONVERTER);
+        List<TableColumn<ProductionParametersModel, String>> tableColumns = getTableColumns(chemicalCompositionParamNames, StringUtils::capitalize, TWO_DECIMAL_CONVERTER);
         tableColumns.forEach(column -> column.setPrefWidth(40));
         return tableColumns;
     }

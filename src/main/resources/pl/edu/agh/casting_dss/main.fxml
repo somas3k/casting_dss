@@ -3,6 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.chart.BubbleChart?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0"
             prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="pl.edu.agh.casting_dss.gui.controller.MainController">
@@ -86,12 +87,23 @@
                       AnchorPane.topAnchor="10">
                     <HBox spacing="20">
                         <VBox spacing="20">
-                            <HBox spacing="20">
+                            <HBox alignment="CENTER_LEFT" spacing="20">
                                 <Label text="Rozwiązanie"/>
-                                <Button fx:id="generateRandomSolution" text="Wygeneruj losowe rozwiązanie"/>
+                                <Button fx:id="generateRandomSolution" text="Wygeneruj losowe"/>
+                                <Button fx:id="clearSolution" text="Usuń"/>
+                                <Button fx:id="saveSolution" text="Zapisz"/>
+                                <Button fx:id="restoreSolution" text="Przywróć"/>
+                                <Button fx:id="enterSolution" text="Wprowadź"/>
                             </HBox>
-
                             <TableView fx:id="solution"/>
+                            <HBox alignment="CENTER_LEFT" spacing="20">
+                                <Label text="Maksymalny czas przeszukiwania (w sekundach):"/>
+                                <TextField fx:id="maxRuntime"/>
+                            </HBox>
+                            <HBox spacing="20" alignment="CENTER_LEFT">
+                                <Label text="Wybierz algorytm przeszukujący:"/>
+                                <ComboBox fx:id="algoChooser"/>
+                            </HBox>
                         </VBox>
                         <GridPane hgap="10" vgap="10">
                             <Label text="Cena:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
@@ -100,12 +112,14 @@
                             <Label text="Rp02" GridPane.rowIndex="3"/>
                             <Label text="A5" GridPane.rowIndex="4"/>
                             <Label text="HB" GridPane.rowIndex="5"/>
+                            <Label text="K" GridPane.rowIndex="6"/>
                             <TextField fx:id="price" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                             <TextField fx:id="quality" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                             <TextField fx:id="rm" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                             <TextField fx:id="rp02" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                             <TextField fx:id="a5" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                             <TextField fx:id="hb" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                            <TextField fx:id="k" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
                             <columnConstraints>
                                 <ColumnConstraints/>
                                 <ColumnConstraints/>

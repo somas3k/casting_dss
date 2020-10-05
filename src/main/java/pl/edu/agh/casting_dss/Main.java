@@ -15,9 +15,11 @@ import pl.edu.agh.casting_dss.utils.SystemConfiguration;
 import pl.edu.agh.casting_dss.utils.SystemConfigurationUtils;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main extends Application {
-
+    public static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     public static void main(String[] args) {
         launch(args);
     }
@@ -35,5 +37,11 @@ public class Main extends Application {
         Scene scene = new Scene(parent);
         stage.setScene(scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        EXECUTOR_SERVICE.shutdownNow();
     }
 }

@@ -12,20 +12,20 @@ import lombok.Setter;
 @AllArgsConstructor
 public class MechanicalPropertiesModel {
     private final PossibleValues possibleValues;
-//    private final Model rmModel;
-//    private final Model rp02Model;
-//    private final Model a5Model;
+    private final Model rmModel;
+    private final Model rp02Model;
+    private final Model a5Model;
     private final Model hbModel;
-//    private final Model kModel;
+    private final Model kModel;
 
 
     public MechanicalProperties evaluateProductionParameters(ProductionParameters parameters) throws Exception {
         return new MechanicalProperties(
-                0,
-                0,
-                0,
+                rmModel.evaluate(parameters),
+                rp02Model.evaluate(parameters),
+                a5Model.evaluate(parameters),
                 hbModel.evaluate(parameters),
-                0
+                kModel.evaluate(parameters)
         );
     }
 }

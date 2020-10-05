@@ -17,7 +17,9 @@ import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import pl.edu.agh.casting_dss.model.Model;
 import pl.edu.agh.casting_dss.single_criteria_opt.ADISolutionGenerator;
 import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraint;
+import pl.edu.agh.casting_dss.solution.SearchType;
 import pl.edu.agh.casting_dss.solution.SolutionFinder;
+import pl.edu.agh.casting_dss.utils.MechanicalProperty;
 import pl.edu.agh.casting_dss.utils.SystemConfiguration;
 
 import java.io.File;
@@ -28,11 +30,12 @@ import java.util.function.Supplier;
 
 import static pl.edu.agh.casting_dss.factories.PossibleValuesFactory.POSSIBLE_VALUES_FACTORY;
 import static pl.edu.agh.casting_dss.factories.XGBModelFactory.XGB_MODEL_FACTORY;
-import static pl.edu.agh.casting_dss.utils.MechanicalProperty.HB;
+import static pl.edu.agh.casting_dss.utils.MechanicalProperty.*;
 
 @Getter
 public class DSSModel {
     private final ObjectProperty<Integer> thicknessProperty = new SimpleObjectProperty<>(25);
+    private final ObjectProperty<Integer> maxRuntime = new SimpleObjectProperty<>(60);
     private final ObjectProperty<Double> avgIronCostProperty = new SimpleObjectProperty<>(1350.0);
     private final ObjectProperty<Double> avgBatchWeightProperty = new SimpleObjectProperty<>(200.0);
     private final ObjectProperty<Double> niPriceProperty = new SimpleObjectProperty<>(16.0);
@@ -49,6 +52,8 @@ public class DSSModel {
     private final ObservableList<ProductionRange> ranges;
     private final Norms norms;
     private final ADISolutionGenerator generator;
+    private ProductionParametersModel savedSolution;
+    private SearchType searchType = SearchType.RANDOM_SEARCH;
 
     public DSSModel(SystemConfiguration configuration, List<ProductionRange> ranges, Norms norms) throws IOException, ModelLoadingException {
         this.ranges = FXCollections.observableArrayList(ranges);
@@ -56,10 +61,12 @@ public class DSSModel {
         matchingNormProperty.setValue(calculateMatchingNorm());
         selectedNormType.addListener((observableValue, normType, t1) -> matchingNormProperty.set(calculateMatchingNorm()));
         PossibleValues possibleValues = POSSIBLE_VALUES_FACTORY.getFromFile(new File(configuration.getPossibleValuesPath()));
-        Model hbModel = XGB_MODEL_FACTORY.getHBModel(
-                new File(configuration.getModelPath(HB)),
-                new File(configuration.getModelInputConfigurationPath(HB)));
-        MechanicalPropertiesModel model = new MechanicalPropertiesModel(possibleValues, hbModel);
+        Model hbModel = getModel(configuration, HB);
+        Model rmModel = getModel(configuration, RM);
+        Model rp02Model = getModel(configuration, RP02);
+        Model a5Model = getModel(configuration, A5);
+        Model kModel = getModel(configuration, K);
+        MechanicalPropertiesModel model = new MechanicalPropertiesModel(possibleValues, rmModel, rp02Model, a5Model, hbModel, kModel);
         generator = new ADISolutionGenerator(thicknessProperty.getValue(), matchingNormProperty.get());
         finder = new SolutionFinder(
                 generator,
@@ -82,6 +89,12 @@ public class DSSModel {
             }
         });
         addListeners();
+    }
+
+    private Model getModel(SystemConfiguration configuration, MechanicalProperty property) throws ModelLoadingException {
+        return XGB_MODEL_FACTORY.getXGBModel(
+                new File(configuration.getModelPath(property)),
+                new File(configuration.getModelInputConfigurationPath(property)));
     }
 
     private Norms wrapListsWithObservableLists(Norms norms) {
@@ -125,6 +138,14 @@ public class DSSModel {
         }
         return actualSolution.get(0).getParams();
     }
+
+    public ProductionParametersModel getActualSolutionModel() {
+        if (actualSolution.size() == 0) {
+            generateRandomSolution();
+        }
+        return actualSolution.get(0);
+    }
+
     public void generateRandomSolution() {
         setActualSolution(finder.findRandomSolution());
     }
@@ -211,5 +232,26 @@ public class DSSModel {
             return "30<t<=60";
         }
         return "60<t<=100";
+    }
+
+    public void clearSolution() {
+        actualSolution.clear();
+    }
+
+    public void saveSolution() {
+        this.savedSolution = actualSolution.get(0);
+    }
+
+    public void restoreSolution() {
+        this.actualSolution.clear();
+        this.actualSolution.add(savedSolution);
+    }
+
+    public void setSearchType(SearchType searchType) {
+        this.searchType = searchType;
+    }
+
+    public void setActualSolutionModel(ProductionParametersModel parseSolutionInput) {
+
     }
 }

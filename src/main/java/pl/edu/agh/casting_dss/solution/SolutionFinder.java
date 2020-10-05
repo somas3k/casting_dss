@@ -13,21 +13,19 @@ import pl.edu.agh.casting_dss.criterions.WeightedNormalizedScalar;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import pl.edu.agh.casting_dss.gui.model.DSSModel;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
-import pl.edu.agh.casting_dss.single_criteria_opt.*;
+import pl.edu.agh.casting_dss.single_criteria_opt.ADISolutionGenerator;
+import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
+import pl.edu.agh.casting_dss.single_criteria_opt.QCFunction;
 import pl.edu.agh.casting_dss.utils.CostUtils;
 
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static pl.edu.agh.casting_dss.solution.SearchType.EXHAUSTIVE_SEARCH;
-import static pl.edu.agh.casting_dss.solution.SearchType.TABU_SEARCH;
+import static pl.edu.agh.casting_dss.Main.EXECUTOR_SERVICE;
 
 @Setter
 @Getter
 public class SolutionFinder {
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newSingleThreadExecutor();
     private final ADISolutionGenerator generator;
     private CostFunction costFunction;
     private QualityFunction qualityFunction;
@@ -65,8 +63,8 @@ public class SolutionFinder {
 
         GenericProblem<OptimizedADISolution, MechanicalPropertiesModel> problem = new GenericProblem<>(model, qcFun, generator);
         problem.addMandatoryConstraint(dssModel.calculateMatchingNorm());
-        Search<OptimizedADISolution> search = SearchAlgorithmsFactory.getSearchAlgorithm(problem, EXHAUSTIVE_SEARCH, model.getPossibleValues(), new OptimizedADISolution(dssModel.getActualSolutionParameters()));
-        search.addStopCriterion(new MaxRuntime(60, TimeUnit.SECONDS));
+        Search<OptimizedADISolution> search = SearchAlgorithmsFactory.getSearchAlgorithm(problem, dssModel.getSearchType(), model.getPossibleValues(), new OptimizedADISolution(dssModel.getActualSolutionParameters()));
+        search.addStopCriterion(new MaxRuntime(dssModel.getMaxRuntime().get(), TimeUnit.SECONDS));
         search.addSearchListener(listener);
         EXECUTOR_SERVICE.execute(() -> {
             search.start();

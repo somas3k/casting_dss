@@ -54,6 +54,9 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
             if (numSteps > 1000) {
                 stepStep = 1000;
             }
+            if (numSteps > 10000) {
+                stepStep = 10000;
+            }
         }
     }
 

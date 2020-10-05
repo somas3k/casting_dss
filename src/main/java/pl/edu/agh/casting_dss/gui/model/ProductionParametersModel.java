@@ -1,5 +1,6 @@
 package pl.edu.agh.casting_dss.gui.model;
 
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -8,6 +9,8 @@ import lombok.Setter;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 
 import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -41,6 +44,10 @@ public class ProductionParametersModel {
     public void addListenerToAllParameters(ChangeListener<? super Number> listener) {
         parametersMap.values().forEach(numberObjectProperty -> numberObjectProperty.addListener((observableValue, number, t1) -> updateParams()));
         parametersMap.values().forEach(numberObjectProperty -> numberObjectProperty.addListener(listener));
+    }
 
+    @Override
+    public String toString() {
+        return parametersMap.values().stream().map(prop -> prop.getValue().toString()).collect(Collectors.joining(" "));
     }
 }

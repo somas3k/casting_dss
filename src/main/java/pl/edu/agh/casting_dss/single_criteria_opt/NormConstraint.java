@@ -43,12 +43,12 @@ public class NormConstraint implements Constraint<OptimizedADISolution, Mechanic
             return FALSE;
         }
         if (
-//                properties.getRm() >= rmMin &&
-//                properties.getRp02() >= rp02Min &&
-//                properties.getA5() >= a5Min &&
+                properties.getRm() >= rmMin &&
+                properties.getRp02() >= rp02Min &&
+                properties.getA5() >= a5Min &&
                 properties.getHb() >= hbMin &&
-                properties.getHb() <= hbMax
-//                properties.getK() >= kMin
+                properties.getHb() <= hbMax &&
+                properties.getK() >= kkMin
         ) {
             return TRUE;
         }
