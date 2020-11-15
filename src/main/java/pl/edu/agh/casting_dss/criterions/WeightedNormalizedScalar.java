@@ -11,6 +11,10 @@ public class WeightedNormalizedScalar implements Function {
     private final double maxValue;
     private final boolean reverse;
 
+    public double getWeight() {
+        return weight;
+    }
+
     @Override
     public double evaluate(ProductionParameters parameters) {
 

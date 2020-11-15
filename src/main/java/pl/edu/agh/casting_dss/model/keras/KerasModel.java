@@ -1,15 +1,20 @@
 package pl.edu.agh.casting_dss.model.keras;
 
+import org.nd4j.linalg.factory.Nd4j;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import pl.edu.agh.casting_dss.model.Model;
 import pl.edu.agh.casting_dss.model.ModelInputConfiguration;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import pl.edu.agh.casting_dss.utils.MinMaxScaler;
 
-public abstract class KerasModel extends Model {
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class KerasModel extends Model {
     protected final MultiLayerNetwork model;
 
-    protected KerasModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
+    public KerasModel(MultiLayerNetwork model, ModelInputConfiguration inputConfiguration) {
         super(inputConfiguration);
         this.model = model;
     }
@@ -19,5 +24,17 @@ public abstract class KerasModel extends Model {
         return model.output(prepareInput(parameters)).getFloat(0);
     }
 
-    abstract INDArray prepareInput(ProductionParameters parameters);
+    INDArray prepareInput(ProductionParameters parameters) {
+        Map<String, Double> scaled = MinMaxScaler.scale(parameters,
+                inputConfiguration.getMinParams(),
+                inputConfiguration.getMaxParams(),
+                inputConfiguration.getOffset()
+        );
+
+        return Nd4j.create(
+                inputConfiguration.getModelInput().stream()
+                        .map(scaled::get)
+                        .collect(Collectors.toList())
+        );
+    }
 }

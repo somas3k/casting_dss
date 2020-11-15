@@ -1,12 +1,10 @@
 package pl.edu.agh.casting_dss.single_criteria_opt;
 
+import lombok.AllArgsConstructor;
+import org.jamesframework.core.problems.objectives.Objective;
 import pl.edu.agh.casting_dss.criterions.WeightedNormalizedScalar;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
-import lombok.AllArgsConstructor;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
-import org.jamesframework.core.problems.objectives.Objective;
-import org.jamesframework.core.problems.objectives.evaluations.Evaluation;
-import org.jamesframework.core.problems.objectives.evaluations.SimpleEvaluation;
 
 @AllArgsConstructor
 public class QCFunction implements Objective<OptimizedADISolution, MechanicalPropertiesModel> {

@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 public class HeatTreatmentChange implements Move<OptimizedADISolution> {
     private final BiFunction<ProductionParameters, Integer, Integer> valueChanger;
     private final Integer newValue;
-    private int prevValue;
+    private Integer prevValue;
 
     public HeatTreatmentChange(BiFunction<ProductionParameters, Integer, Integer> valueChanger, Integer newValue) {
         this.valueChanger = valueChanger;

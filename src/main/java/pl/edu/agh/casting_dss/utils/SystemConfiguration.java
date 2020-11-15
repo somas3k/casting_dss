@@ -22,4 +22,8 @@ public class SystemConfiguration {
     public String getModelInputConfigurationPath(MechanicalProperty property) {
         return modelWithInputConfigurationPaths.get(property).getModelInputConfigPath();
     }
+
+    public ModelType getModelType(MechanicalProperty property) {
+        return modelWithInputConfigurationPaths.get(property).getType();
+    }
 }

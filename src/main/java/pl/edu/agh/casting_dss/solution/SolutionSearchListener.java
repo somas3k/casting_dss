@@ -14,15 +14,23 @@ import pl.edu.agh.casting_dss.gui.model.DSSModel;
 import pl.edu.agh.casting_dss.single_criteria_opt.DetailedEvaluation;
 import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class SolutionSearchListener implements SearchListener<OptimizedADISolution> {
 
     private final TextArea searchingLog;
     private final DSSModel model;
     private int stepStep = 100;
+    private long lastStep = 0;
+    private List<List<Object>> history = new ArrayList<>();
+
 
     public SolutionSearchListener(TextArea searchingLog, DSSModel model) {
         this.searchingLog = searchingLog;
         this.model = model;
+        history.add(Arrays.asList("Step", "Type", "Cost", "Quality", "QC"));
     }
 
     @Override
@@ -38,17 +46,21 @@ public class SolutionSearchListener implements SearchListener<OptimizedADISoluti
     @Override
     public void newBestSolution(Search<? extends OptimizedADISolution> search, OptimizedADISolution newBestSolution, Evaluation newBestSolutionEvaluation, Validation newBestSolutionValidation) {
         DetailedEvaluation evaluation = (DetailedEvaluation) newBestSolutionEvaluation;
-        addNewLine(String.format("Znaleziono nowe najlepsze rozwiązanie, koszt: %.2f, jakość: %.2f", evaluation.getCostValue(), evaluation.getQualityValue()));
+        addNewLine(String.format("Krok %d: Znaleziono nowe najlepsze rozwiązanie, koszt: %.2f, jakość: %.2f", lastStep, evaluation.getCostValue(), evaluation.getQualityValue()));
+        history.add(Arrays.asList(lastStep, "BEST", evaluation.getCostValue(), evaluation.getQualityValue(), evaluation.getValue()));
         Platform.runLater(() -> model.setActualSolution(newBestSolution.getProductionParameters()));
     }
 
     @Override
     public void newCurrentSolution(LocalSearch<? extends OptimizedADISolution> search, OptimizedADISolution newCurrentSolution, Evaluation newCurrentSolutionEvaluation, Validation newCurrentSolutionValidation) {
-//        addNewLine("New current solution found");
+        DetailedEvaluation evaluation = (DetailedEvaluation) newCurrentSolutionEvaluation;
+//        addNewLine(String.format("Krok %d: Nowe obecne rozwiazanie, koszt: %.2f, jakość: %.2f, poprawne: %s", lastStep, evaluation.getCostValue(), evaluation.getQualityValue(), newCurrentSolutionValidation.passed() ? "tak": "nie"));
+        history.add(Arrays.asList(lastStep, "CURRENT", evaluation.getCostValue(), evaluation.getQualityValue(), evaluation.getValue()));
     }
 
     @Override
     public void stepCompleted(Search<? extends OptimizedADISolution> search, long numSteps) {
+        lastStep = numSteps;
         if (numSteps % stepStep == 0) {
             addNewLine("Krok " + numSteps + " zakończony");
             if (numSteps > 1000) {

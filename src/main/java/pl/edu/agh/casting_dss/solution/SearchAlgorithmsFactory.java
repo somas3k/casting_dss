@@ -1,15 +1,12 @@
 package pl.edu.agh.casting_dss.solution;
 
 import org.jamesframework.core.problems.Problem;
-import org.jamesframework.core.problems.sol.Solution;
+import org.jamesframework.core.search.LocalSearch;
 import org.jamesframework.core.search.Search;
 import org.jamesframework.core.search.algo.*;
 import org.jamesframework.core.search.algo.exh.ExhaustiveSearch;
-import org.jamesframework.core.search.algo.exh.SolutionIterator;
 import org.jamesframework.core.search.algo.tabu.FullTabuMemory;
 import org.jamesframework.core.search.algo.tabu.TabuSearch;
-import org.jamesframework.core.search.algo.vns.VariableNeighbourhoodDescent;
-import org.jamesframework.core.search.neigh.Neighbourhood;
 import pl.edu.agh.casting_dss.data.PossibleValues;
 import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
 import pl.edu.agh.casting_dss.single_criteria_opt.ProdParamsNeighborhood;
@@ -17,24 +14,37 @@ import pl.edu.agh.casting_dss.single_criteria_opt.ProdParamsNeighborhood;
 public class SearchAlgorithmsFactory {
     public static Search<OptimizedADISolution> getSearchAlgorithm(Problem<OptimizedADISolution> problem, SearchType type, PossibleValues possibleValues, OptimizedADISolution actualSolution) {
         ProdParamsNeighborhood neighborhood = new ProdParamsNeighborhood(possibleValues);
+        Search<OptimizedADISolution> chosenSearch = new RandomSearch<>(problem);
         switch (type) {
             case RANDOM_SEARCH:
-                return new RandomSearch<>(problem);
+                chosenSearch = new RandomSearch<>(problem);
+                break;
             case TABU_SEARCH:
-                TabuSearch<OptimizedADISolution> tabuSearch = new TabuSearch<>(problem, neighborhood, new FullTabuMemory<>(200));
-                tabuSearch.setCurrentSolution(actualSolution);
-                return tabuSearch;
+                chosenSearch = new TabuSearch<>(problem, neighborhood, new FullTabuMemory<>(300));
+                break;
             case EXHAUSTIVE_SEARCH:
-                return new ExhaustiveSearch<>(problem, new ADISolutionIterator(possibleValues, actualSolution.getProductionParameters().getThickness()));
+                chosenSearch = new ExhaustiveSearch<>(problem, new ADISolutionIterator(possibleValues, actualSolution.getProductionParameters().getThickness()));
+                break;
             case METROPOLIS_SEARCH:
-                return new MetropolisSearch<>(problem, neighborhood, 1000.0);
+                chosenSearch = new MetropolisSearch<>(problem, neighborhood, 10.0);
+                break;
             case PARALLEL_TEMPERING:
-                return new ParallelTempering<>(problem, neighborhood, 200, 200, 1000);
+                chosenSearch = new ParallelTempering<>(problem, neighborhood, 10, 1, 200, (p, n, t) -> {
+                    MetropolisSearch<OptimizedADISolution> search = new MetropolisSearch<>(p, n, t);
+                    search.setCurrentSolution(actualSolution);
+                    return search;
+                });
+                break;
             case RANDOM_DESCENT:
-                return new RandomDescent<>(problem, neighborhood);
+                chosenSearch = new RandomDescent<>(problem, neighborhood);
+                break;
             case STEEPEST_DESCENT:
-                return new SteepestDescent<>(problem, neighborhood);
+                chosenSearch = new SteepestDescent<>(problem, neighborhood);
+                break;
         }
-        return new RandomSearch<>(problem);
+        if (chosenSearch instanceof LocalSearch) {
+            ((LocalSearch<OptimizedADISolution>) chosenSearch).setCurrentSolution(actualSolution);
+        }
+        return chosenSearch;
     }
 }

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static pl.edu.agh.casting_dss.factories.KerasModelFactory.KERAS_MODEL_FACTORY;
 import static pl.edu.agh.casting_dss.factories.PossibleValuesFactory.POSSIBLE_VALUES_FACTORY;
 import static pl.edu.agh.casting_dss.factories.XGBModelFactory.XGB_MODEL_FACTORY;
 import static pl.edu.agh.casting_dss.utils.MechanicalProperty.*;
@@ -92,9 +93,18 @@ public class DSSModel {
     }
 
     private Model getModel(SystemConfiguration configuration, MechanicalProperty property) throws ModelLoadingException {
-        return XGB_MODEL_FACTORY.getXGBModel(
-                new File(configuration.getModelPath(property)),
-                new File(configuration.getModelInputConfigurationPath(property)));
+        switch (configuration.getModelType(property)) {
+            case XGB:
+                return XGB_MODEL_FACTORY.getXGBModel(
+                        new File(configuration.getModelPath(property)),
+                        new File(configuration.getModelInputConfigurationPath(property)));
+            case KERAS:
+                return KERAS_MODEL_FACTORY.getKerasModel(
+                        new File(configuration.getModelPath(property)),
+                        new File(configuration.getModelInputConfigurationPath(property))
+                );
+        }
+        throw new ModelLoadingException("Model type: " + configuration.getModelType(property) + " is not supported");
     }
 
     private Norms wrapListsWithObservableLists(Norms norms) {

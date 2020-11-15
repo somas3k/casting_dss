@@ -1,6 +1,6 @@
 package pl.edu.agh.casting_dss.factories;
 
-import pl.edu.agh.casting_dss.model.keras.HBKerasModel;
+import pl.edu.agh.casting_dss.model.Model;
 import pl.edu.agh.casting_dss.model.keras.KerasModel;
 import pl.edu.agh.casting_dss.model.ModelInputConfiguration;
 import org.deeplearning4j.nn.modelimport.keras.KerasModelImport;
@@ -15,12 +15,12 @@ public class KerasModelFactory {
     public static final KerasModelFactory KERAS_MODEL_FACTORY = new KerasModelFactory();
     private final ModelInputConfFactory confFactory = new ModelInputConfFactory();
 
-    public KerasModel getHBModel(File h5File, File confJsonPath) throws ModelLoadingException {
+    public Model getKerasModel(File modelPath, File modelInputConfiguration) throws ModelLoadingException {
         try {
             MultiLayerNetwork model = KerasModelImport.
-                    importKerasSequentialModelAndWeights(h5File.getPath());
-            ModelInputConfiguration conf = confFactory.getConfiguration(confJsonPath);
-            return new HBKerasModel(model, conf);
+                    importKerasSequentialModelAndWeights(modelPath.getPath());
+            ModelInputConfiguration conf = confFactory.getConfiguration(modelInputConfiguration);
+            return new KerasModel(model, conf);
         } catch (IOException e) {
             throw new ModelLoadingException("Wrong path", e);
         } catch (InvalidKerasConfigurationException e) {
@@ -29,6 +29,4 @@ public class KerasModelFactory {
             throw new ModelLoadingException("Not compatible with Keras", e);
         }
     }
-
-
 }
