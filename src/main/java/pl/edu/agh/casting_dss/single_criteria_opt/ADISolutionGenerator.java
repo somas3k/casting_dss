@@ -5,6 +5,7 @@ import lombok.Setter;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import org.jamesframework.core.problems.sol.RandomSolutionGenerator;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
 
 import java.util.HashMap;
 import java.util.List;

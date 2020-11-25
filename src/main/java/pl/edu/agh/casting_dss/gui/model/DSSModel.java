@@ -17,8 +17,11 @@ import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import pl.edu.agh.casting_dss.model.Model;
 import pl.edu.agh.casting_dss.single_criteria_opt.ADISolutionGenerator;
 import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraint;
-import pl.edu.agh.casting_dss.solution.SearchType;
-import pl.edu.agh.casting_dss.solution.SolutionFinder;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
+import pl.edu.agh.casting_dss.solution.james.SearchAlgorithmsFactory;
+import pl.edu.agh.casting_dss.solution.james.SearchType;
+import pl.edu.agh.casting_dss.solution.james.SolutionFinder;
+import pl.edu.agh.casting_dss.solution.jmetal.JMetalSolutionFinder;
 import pl.edu.agh.casting_dss.utils.MechanicalProperty;
 import pl.edu.agh.casting_dss.utils.SystemConfiguration;
 
@@ -26,7 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static pl.edu.agh.casting_dss.factories.KerasModelFactory.KERAS_MODEL_FACTORY;
 import static pl.edu.agh.casting_dss.factories.PossibleValuesFactory.POSSIBLE_VALUES_FACTORY;
@@ -50,11 +55,14 @@ public class DSSModel {
     private final ObjectProperty<NormConstraint> matchingNormProperty = new SimpleObjectProperty<>();
     private final ObservableList<ProductionParametersModel> actualSolution = FXCollections.observableArrayList();
     private final SolutionFinder finder;
+    private final JMetalSolutionFinder jMetalSolutionFinder;
     private final ObservableList<ProductionRange> ranges;
     private final Norms norms;
     private final ADISolutionGenerator generator;
     private ProductionParametersModel savedSolution;
     private SearchType searchType = SearchType.RANDOM_SEARCH;
+    private SearchAlgorithmsFactory algoFactory = new SearchAlgorithmsFactory();
+    private Random random = new Random();
 
     public DSSModel(SystemConfiguration configuration, List<ProductionRange> ranges, Norms norms) throws IOException, ModelLoadingException {
         this.ranges = FXCollections.observableArrayList(ranges);
@@ -72,24 +80,39 @@ public class DSSModel {
         finder = new SolutionFinder(
                 generator,
                 model,
-                new CostFunction(avgIronCostProperty, avgBatchWeightProperty, niPriceProperty, cuPriceProperty, moPriceProperty),
-                new QualityFunction(this.ranges));
+                getCostFunction(),
+                getQualityFunction());
+        jMetalSolutionFinder = new JMetalSolutionFinder(model,
+                getCostFunction(),
+                getQualityFunction());
         thicknessProperty.addListener((observableValue, integer, t1) -> {
             matchingNormProperty.setValue(calculateMatchingNorm());
             generator.setThickness(t1);
         });
         matchingNormProperty.addListener((observableValue, normConstraint, t1) -> generator.setConstraint(t1));
         actualSolution.addListener((ListChangeListener<ProductionParametersModel>) change -> {
-            if (change.getList().size() == 1) {
+            if (change.getList().size() > 0) {
                 updateCostAndQuality(() -> change.getList().get(0));
-                try {
-                    mechanicalPropertiesProperty.setValue(finder.getModel().evaluateProductionParameters(change.getList().get(0).getParams()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
         });
         addListeners();
+    }
+
+    public QualityFunction getQualityFunction() {
+        return new QualityFunction(this.ranges);
+    }
+
+    public CostFunction getCostFunction() {
+        return new CostFunction(avgIronCostProperty, avgBatchWeightProperty, niPriceProperty, cuPriceProperty, moPriceProperty);
+    }
+
+    public DSSModel(SystemConfiguration configuration, List<ProductionRange> ranges, Norms norms, SearchAlgorithmsFactory factory) throws IOException, ModelLoadingException {
+        this(configuration, ranges, norms);
+        this.algoFactory = factory;
+    }
+
+    public void setRandom(Random random) {
+        this.random = random;
     }
 
     private Model getModel(SystemConfiguration configuration, MechanicalProperty property) throws ModelLoadingException {
@@ -129,6 +152,13 @@ public class DSSModel {
         actualSolution.add(e);
     }
 
+    public void setSolutions(List<ProductionParameters> parameters) {
+        actualSolution.clear();
+        List<ProductionParametersModel> paramModels = parameters.stream().map(ProductionParametersModel::new).collect(Collectors.toList());
+        paramModels.get(0).addListenerToAllParameters((observableValue, number, t1) -> updateCostAndQuality(() -> actualSolution.get(0)));
+        actualSolution.addAll(paramModels);
+    }
+
     private void updateCostAndQuality(Supplier<ProductionParametersModel> prodSupplier) {
         ProductionParametersModel productionParametersModel = prodSupplier.get();
         if (productionParametersModel != null) {
@@ -136,28 +166,55 @@ public class DSSModel {
             actualPrice.setValue(finder.getCostFunction().evaluate(params));
             actualQuality.setValue(finder.getQualityFunction().evaluate(params));
         }
+        if (actualSolution.size() > 0) {
+            try {
+                mechanicalPropertiesProperty.setValue(finder.getModel().evaluateProductionParameters(actualSolution.get(0).getParams()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void updateCostAndQuality() {
         updateCostAndQuality(() -> actualSolution.size() > 0 ? actualSolution.get(0) : null);
+        if (actualSolution.size() > 0) {
+            try {
+                mechanicalPropertiesProperty.setValue(finder.getModel().evaluateProductionParameters(actualSolution.get(0).getParams()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void updateCostAndQuality(int index) {
+        updateCostAndQuality(() -> actualSolution.size() > 0 ? actualSolution.get(index) : null);
+        try {
+            mechanicalPropertiesProperty.setValue(finder.getModel().evaluateProductionParameters(actualSolution.get(index).getParams()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public ProductionParameters getActualSolutionParameters() {
         if (actualSolution.size() == 0) {
-            generateRandomSolution();
+            generateAndSetRandomSolution();
         }
         return actualSolution.get(0).getParams();
     }
 
     public ProductionParametersModel getActualSolutionModel() {
         if (actualSolution.size() == 0) {
-            generateRandomSolution();
+            generateAndSetRandomSolution();
         }
         return actualSolution.get(0);
     }
 
-    public void generateRandomSolution() {
-        setActualSolution(finder.findRandomSolution());
+    public void generateAndSetRandomSolution() {
+        setActualSolution(finder.findRandomSolution(random));
+    }
+
+    public OptimizedADISolution generateRandomSolution() {
+        return new OptimizedADISolution(finder.findRandomSolution(random));
     }
 
     public void setThickness(Integer thickness) {

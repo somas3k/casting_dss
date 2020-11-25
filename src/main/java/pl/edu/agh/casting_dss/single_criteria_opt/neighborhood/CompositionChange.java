@@ -1,7 +1,8 @@
-package pl.edu.agh.casting_dss.single_criteria_opt;
+package pl.edu.agh.casting_dss.single_criteria_opt.neighborhood;
 
 import org.jamesframework.core.search.neigh.Move;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
 
 import java.util.Map;
 

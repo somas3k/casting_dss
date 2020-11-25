@@ -2,29 +2,29 @@
   "modelWithInputConfigurationPaths": {
     "HB": {
       "type" : "XGB",
-      "modelPath": "/home/sg0303587/Desktop/hb_xgb.bin",
-      "modelInputConfigPath": "/home/sg0303587/Desktop/hb_model_conf.json"
+      "modelPath": "./models/hb_xgb.bin",
+      "modelInputConfigPath": "./models/hb_model_conf.json"
     },
     "Rm": {
       "type" : "XGB",
-      "modelPath": "/home/sg0303587/Desktop/rm_xgb.bin",
-      "modelInputConfigPath": "/home/sg0303587/Desktop/rm_model_conf.json"
+      "modelPath": "./models/rm_xgb.bin",
+      "modelInputConfigPath": "./models/rm_model_conf.json"
     },
     "Rp02": {
       "type" : "XGB",
-      "modelPath": "/home/sg0303587/Desktop/rp02_xgb.bin",
-      "modelInputConfigPath": "/home/sg0303587/Desktop/rp02_model_conf.json"
+      "modelPath": "./models/rp02_xgb.bin",
+      "modelInputConfigPath": "./models/rp02_model_conf.json"
     },
     "A5": {
       "type" : "XGB",
-      "modelPath": "/home/sg0303587/Desktop/a5_xgb.bin",
-      "modelInputConfigPath": "/home/sg0303587/Desktop/a5_model_conf.json"
+      "modelPath": "./models/a5_xgb.bin",
+      "modelInputConfigPath": "./models/a5_model_conf.json"
     },
     "K": {
       "type" : "XGB",
-      "modelPath": "/home/sg0303587/Desktop/k_xgb.bin",
-      "modelInputConfigPath": "/home/sg0303587/Desktop/k_model_conf.json"
+      "modelPath": "./models/k_xgb.bin",
+      "modelInputConfigPath": "./models/k_model_conf.json"
     }
   },
-  "possibleValuesPath": "/home/sg0303587/Desktop/possible_values.json"
+  "possibleValuesPath": "./models/possible_values.json"
 }

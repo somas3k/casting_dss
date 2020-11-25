@@ -10,18 +10,17 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.MouseEvent;
 import javafx.util.StringConverter;
 import org.jamesframework.core.search.Search;
-import org.jamesframework.core.search.listeners.SearchListener;
 import org.nd4j.common.io.StringUtils;
-import pl.edu.agh.casting_dss.data.NormType;
 import pl.edu.agh.casting_dss.criterions.ProductionRange;
 import pl.edu.agh.casting_dss.data.MechanicalProperties;
+import pl.edu.agh.casting_dss.data.NormType;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import pl.edu.agh.casting_dss.gui.model.DSSModel;
 import pl.edu.agh.casting_dss.gui.model.ProductionParametersModel;
 import pl.edu.agh.casting_dss.single_criteria_opt.NormConstraint;
-import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
-import pl.edu.agh.casting_dss.solution.SearchType;
-import pl.edu.agh.casting_dss.solution.SolutionSearchListener;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
+import pl.edu.agh.casting_dss.solution.james.SearchType;
+import pl.edu.agh.casting_dss.solution.james.SolutionSearchListener;
 
 import java.net.URL;
 import java.util.*;
@@ -261,6 +260,13 @@ public class MainController implements Initializable {
         solution.setEditable(true);
         solution.setFixedCellSize(25);
         solution.prefHeightProperty().bind(Bindings.size(solution.getItems()).multiply(solution.getFixedCellSize()).add(55));
+        solution.getSelectionModel().selectedIndexProperty().addListener((observableValue, oldIdx, newIdx) -> {
+            if (newIdx.intValue() == -1) {
+                model.updateCostAndQuality();
+            } else {
+                model.updateCostAndQuality(newIdx.intValue());
+            }
+        });
     }
 
     private List<TableColumn<ProductionParametersModel, String>>  getChemicalCompositionColumns() {
@@ -294,6 +300,9 @@ public class MainController implements Initializable {
         SolutionSearchListener searchListener = new SolutionSearchListener(searchingLog, model);
         if (validateNorms()) {
             searchReference = model.getFinder().findSolution(model, searchListener);
+//            model.getJMetalSolutionFinder().findSolution(model, (results) -> Platform.runLater(() -> {
+//                model.setSolutions(results);
+//            }));
         } else {
             new Alert(Alert.AlertType.ERROR,"Wybrana norma nie została uzupełniona\ndla podanej grubości", ButtonType.CANCEL).show();
         }
@@ -318,7 +327,7 @@ public class MainController implements Initializable {
         costQualityPropValue.textProperty().bindBidirectional(costQualityProportion.valueProperty(), (StringConverter) TWO_DECIMAL_CONVERTER);
         generateRandomSolution.setOnMouseClicked(mouseEvent -> {
             if (model != null) {
-                model.generateRandomSolution();
+                model.generateAndSetRandomSolution();
             }
         });
     }

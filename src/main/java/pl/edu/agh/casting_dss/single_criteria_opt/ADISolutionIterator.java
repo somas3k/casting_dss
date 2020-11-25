@@ -1,9 +1,9 @@
-package pl.edu.agh.casting_dss.solution;
+package pl.edu.agh.casting_dss.single_criteria_opt;
 
 import org.jamesframework.core.search.algo.exh.SolutionIterator;
 import pl.edu.agh.casting_dss.data.PossibleValues;
 import pl.edu.agh.casting_dss.data.ProductionParameters;
-import pl.edu.agh.casting_dss.single_criteria_opt.OptimizedADISolution;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
 
 import java.util.Map;
 

@@ -1,11 +1,11 @@
-package pl.edu.agh.casting_dss.single_criteria_opt;
+package pl.edu.agh.casting_dss.solution.james;
 
 import pl.edu.agh.casting_dss.data.ProductionParameters;
 import org.jamesframework.core.problems.sol.Solution;
 
 import java.util.Objects;
 
-public class OptimizedADISolution extends Solution {
+public class OptimizedADISolution extends Solution{
     private final ProductionParameters productionParameters;
 
     public OptimizedADISolution(ProductionParameters productionParameters) {

@@ -7,10 +7,12 @@ import lombok.Setter;
 import pl.edu.agh.casting_dss.data.MechanicalProperties;
 import lombok.AllArgsConstructor;
 import pl.edu.agh.casting_dss.data.NormType;
+import pl.edu.agh.casting_dss.data.ProductionParameters;
 import pl.edu.agh.casting_dss.model.MechanicalPropertiesModel;
 import org.jamesframework.core.problems.constraints.Constraint;
 import org.jamesframework.core.problems.constraints.validations.SimpleValidation;
 import org.jamesframework.core.problems.constraints.validations.Validation;
+import pl.edu.agh.casting_dss.solution.james.OptimizedADISolution;
 
 @AllArgsConstructor
 @Setter
@@ -28,16 +30,15 @@ public class NormConstraint implements Constraint<OptimizedADISolution, Mechanic
     private static final SimpleValidation TRUE = new SimpleValidation(true);
     private static final SimpleValidation FALSE = new SimpleValidation(false);
 
-    public NormConstraint(double hbMin, double hbMax) {
-        this.hbMin = hbMin;
-        this.hbMax = hbMax;
-    }
-
     @Override
     public Validation validate(OptimizedADISolution optimizedADISolution, MechanicalPropertiesModel model) {
+        return validate(optimizedADISolution.getProductionParameters(), model);
+    }
+
+    public Validation validate(ProductionParameters parameters, MechanicalPropertiesModel model) {
         MechanicalProperties properties;
         try {
-            properties = model.evaluateProductionParameters(optimizedADISolution.getProductionParameters());
+            properties = model.evaluateProductionParameters(parameters);
         } catch (Exception e) {
             e.printStackTrace();
             return FALSE;
@@ -56,4 +57,5 @@ public class NormConstraint implements Constraint<OptimizedADISolution, Mechanic
     public boolean normHasAllRequiredValues() {
         return rmMin != null && rp02Min != null && hbMin != null && hbMax != null && kkMin != null;
     }
+
 }

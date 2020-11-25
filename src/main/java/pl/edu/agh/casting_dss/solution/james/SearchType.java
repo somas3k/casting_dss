@@ -1,4 +1,4 @@
-package pl.edu.agh.casting_dss.solution;
+package pl.edu.agh.casting_dss.solution.james;
 
 public enum  SearchType {
     RANDOM_SEARCH,

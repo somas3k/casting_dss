@@ -18,8 +18,11 @@ public class MechanicalPropertiesModel {
     private final Model hbModel;
     private final Model kModel;
 
+    public static Integer EVALUATIONS = 0;
+
 
     public MechanicalProperties evaluateProductionParameters(ProductionParameters parameters) throws Exception {
+        EVALUATIONS++;
         return new MechanicalProperties(
                 rmModel.evaluate(parameters),
                 rp02Model.evaluate(parameters),
